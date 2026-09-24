@@ -6,7 +6,7 @@ signal cleaned(table: BuffetTable)
 
 @export var table_name: String = "餐桌"
 
-@onready var body: Polygon2D = get_node_or_null("Body") as Polygon2D
+@onready var body: CanvasItem = get_node_or_null("Body") as CanvasItem
 @onready var clean_point: Marker2D = get_node_or_null("CleanPoint") as Marker2D
 
 var seat_points: Array[Marker2D] = []
@@ -77,8 +77,8 @@ func _update_visual() -> void:
 	if body == null:
 		return
 	if dirty:
-		body.color = Color(0.42, 0.34, 0.27, 1.0)
+		body.modulate = Color(0.72, 0.62, 0.54, 1.0)
 	elif not occupants.is_empty():
-		body.color = Color(0.49, 0.31, 0.18, 1.0)
+		body.modulate = Color(0.95, 0.90, 0.84, 1.0)
 	else:
-		body.color = Color(0.37, 0.25, 0.16, 1.0)
+		body.modulate = Color.WHITE
