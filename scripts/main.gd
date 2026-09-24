@@ -57,6 +57,7 @@ var total_rating: float = 0.0
 var last_review: String = "暂无评价"
 
 var indoor_temperature: float = 29.0
+var heat_load: float = 0.0
 var ac_enabled := true
 var ac_setpoint: float = 24.0
 var selected_speed: float = 1.0
@@ -192,12 +193,15 @@ func _spawn_customer() -> void:
 	customer.update_environment(indoor_temperature)
 
 func _update_environment(delta: float) -> void:
+	heat_load = minf(4.0, 0.7 + float(active_customers.size()) * 0.10)
 	if ac_enabled:
-		indoor_temperature = move_toward(indoor_temperature, ac_setpoint, 0.14 * delta)
-		var cooling_load := maxf(0.0, outdoor_temperature - ac_setpoint)
+		var effective_target := ac_setpoint + heat_load * 0.30
+		indoor_temperature = move_toward(indoor_temperature, effective_target, 0.14 * delta)
+		var cooling_load := maxf(0.0, outdoor_temperature + heat_load - ac_setpoint)
 		utility_cost += 0.020 * delta * (1.0 + cooling_load / 8.0)
 	else:
-		indoor_temperature = move_toward(indoor_temperature, outdoor_temperature, 0.065 * delta)
+		var warm_target := outdoor_temperature + heat_load
+		indoor_temperature = move_toward(indoor_temperature, warm_target, 0.065 * delta)
 
 func _update_customer_environment() -> void:
 	for customer in active_customers:
@@ -419,9 +423,10 @@ func _update_debug_ui() -> void:
 		parts.append("%s %.1f/%.0f" % [station.station_name, station.stock, station.capacity])
 	stock_label.text = "餐台：" + " | ".join(parts)
 
-	environment_label.text = "室外 %.1f℃｜室内 %.1f℃｜空调 %s %.0f℃" % [
+	environment_label.text = "室外 %.1f℃｜室内 %.1f℃｜热负荷 +%.1f℃｜空调 %s %.0f℃" % [
 		outdoor_temperature,
 		indoor_temperature,
+		heat_load,
 		("开" if ac_enabled else "关"),
 		ac_setpoint
 	]
