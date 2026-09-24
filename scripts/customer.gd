@@ -36,8 +36,8 @@ enum State {
 @export var restroom_use_seconds: float = 2.6
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
-@onready var body: Polygon2D = $Body
-@onready var plate: Polygon2D = $Plate
+@onready var visual: ActorVisual = $Visual
+@onready var type_badge: Polygon2D = $TypeBadge
 
 var state: State = State.ENTER
 var entrance_position := Vector2.ZERO
@@ -104,8 +104,9 @@ func setup(
 	patience = patience_max
 	restroom_threshold = float(profile.get("restroom_threshold", 55.0))
 	var tint: Color = profile.get("color", Color(0.25, 0.49, 0.78, 1.0))
-	body.color = tint
-	plate.visible = false
+	type_badge.color = tint
+	visual.set_carry_visible(false)
+	visual.set_action("idle")
 	rng.randomize()
 	call_deferred("_begin_navigation")
 
@@ -120,6 +121,7 @@ func _physics_process(_delta: float) -> void:
 		return
 	if state in [State.DONE, State.EAT, State.CASHIER_SERVICE, State.FOOD_SERVICE, State.RESTROOM_USE]:
 		velocity = Vector2.ZERO
+		visual.set_motion(Vector2.ZERO)
 		return
 
 	if NavigationServer2D.map_get_iteration_id(navigation_agent.get_navigation_map()) == 0:
@@ -131,6 +133,7 @@ func _physics_process(_delta: float) -> void:
 
 	var next_position := navigation_agent.get_next_path_position()
 	var desired_velocity := global_position.direction_to(next_position) * speed
+	visual.set_motion(desired_velocity)
 	if navigation_agent.avoidance_enabled:
 		navigation_agent.velocity = desired_velocity
 	else:
@@ -141,9 +144,11 @@ func _on_velocity_computed(safe_velocity: Vector2) -> void:
 	if state in [State.DONE, State.EAT, State.CASHIER_SERVICE, State.FOOD_SERVICE, State.RESTROOM_USE]:
 		return
 	velocity = safe_velocity
+	visual.set_motion(safe_velocity)
 	move_and_slide()
 
 func _process(delta: float) -> void:
+	z_index = int(global_position.y)
 	_update_comfort(delta)
 	_update_waiting_patience(delta)
 	if state in [State.EXIT, State.DONE]:
@@ -158,7 +163,7 @@ func _process(delta: float) -> void:
 			cashier_timer -= delta
 			if cashier_timer <= 0.0:
 				has_plate = true
-				plate.visible = true
+				visual.set_carry_visible(true)
 				emit_signal("ticket_paid", self, ticket_price)
 				_choose_next_food_or_leave()
 		State.FOOD_SERVICE:
@@ -239,6 +244,8 @@ func begin_food_service(station: FoodStation) -> void:
 	state = State.FOOD_SERVICE
 	food_service_timer = food_service_seconds
 	velocity = Vector2.ZERO
+	visual.set_motion(Vector2.ZERO)
+	visual.set_action("take_food")
 	emit_signal("state_changed", self, "夹菜：" + station.station_name)
 
 func set_table_wait_target(target: Vector2) -> void:
@@ -301,6 +308,8 @@ func _arrive() -> void:
 
 func _set_state(next_state: State) -> void:
 	state = next_state
+	if next_state != State.EAT:
+		visual.set_action("idle")
 	match state:
 		State.ENTER:
 			_set_target(entrance_position)
@@ -319,6 +328,8 @@ func _set_state(next_state: State) -> void:
 				_set_target(reserved_table.get_customer_seat_position(self))
 				emit_signal("state_changed", self, "端盘回桌")
 		State.EAT:
+			visual.set_motion(Vector2.ZERO)
+			visual.set_action("eat")
 			eat_timer = eat_seconds
 			emit_signal("state_changed", self, "吃饭")
 		State.WAIT_TABLE:
@@ -336,7 +347,7 @@ func _set_state(next_state: State) -> void:
 		State.EXIT:
 			_release_table()
 			has_plate = false
-			plate.visible = false
+			visual.set_carry_visible(false)
 			_set_target(exit_position)
 			emit_signal("state_changed", self, "离店")
 		State.DONE:
@@ -389,6 +400,7 @@ func _select_station() -> FoodStation:
 	return best_station
 
 func _finish_food_service() -> void:
+	visual.set_action("idle")
 	_take_food()
 	if reserved_table == null:
 		reserved_table = _reserve_first_table()
@@ -418,6 +430,7 @@ func _take_food() -> void:
 	emit_signal("metrics_changed", self, get_fullness_ratio(), get_payback_ratio())
 
 func _after_eating() -> void:
+	visual.set_action("idle")
 	if restroom_need >= restroom_threshold:
 		_request_restroom(false)
 	else:
