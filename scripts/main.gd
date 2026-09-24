@@ -10,6 +10,8 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 
 @onready var customer_layer: Node2D = $CustomerLayer
 @onready var kitchen: KitchenSystem = $Kitchen
+@onready var pantry: PantrySystem = $Pantry
+@onready var service_worker: ServiceWorker = $Staff/ServiceWorker
 @onready var cashier_counter: Marker2D = $Points/CashierCounter
 @onready var seat_wait_point: Marker2D = $Points/SeatWait
 @onready var restroom_queue_point: Marker2D = $Points/RestroomQueue
@@ -22,6 +24,8 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 @onready var stock_label: Label = $CanvasLayer/UI/VBox/StockLabel
 @onready var environment_label: Label = $CanvasLayer/UI/VBox/EnvironmentLabel
 @onready var kitchen_label: Label = $CanvasLayer/UI/VBox/KitchenLabel
+@onready var pantry_label: Label = $CanvasLayer/UI/VBox/PantryLabel
+@onready var staff_label: Label = $CanvasLayer/UI/VBox/StaffLabel
 @onready var review_label: Label = $CanvasLayer/UI/VBox/ReviewLabel
 @onready var status_label: Label = $CanvasLayer/UI/VBox/StatusLabel
 
@@ -31,6 +35,10 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 @onready var speed_1_button: Button = $CanvasLayer/Controls/HBox/Speed1
 @onready var speed_2_button: Button = $CanvasLayer/Controls/HBox/Speed2
 @onready var speed_3_button: Button = $CanvasLayer/Controls/HBox/Speed3
+@onready var priority_auto_button: Button = $CanvasLayer/PriorityControls/HBox/Auto
+@onready var priority_staple_button: Button = $CanvasLayer/PriorityControls/HBox/Staple
+@onready var priority_meat_button: Button = $CanvasLayer/PriorityControls/HBox/Meat
+@onready var priority_seafood_button: Button = $CanvasLayer/PriorityControls/HBox/Seafood
 
 var stations: Array[FoodStation] = []
 var seats: Array[BuffetSeat] = []
@@ -50,6 +58,7 @@ var finished_today: int = 0
 var ticket_revenue: float = 0.0
 var food_cost: float = 0.0
 var consumed_food_cost: float = 0.0
+var opening_prepared_food_cost: float = 0.0
 var utility_cost: float = 0.0
 
 var total_payback_ratio: float = 0.0
@@ -106,8 +115,9 @@ func _ready() -> void:
 	rng.randomize()
 	_collect_world_objects()
 	_register_initial_inventory_cost()
-	kitchen.setup(stations)
+	kitchen.setup(stations, pantry)
 	kitchen.batch_prepared.connect(_on_kitchen_batch_prepared)
+	kitchen.ingredient_shortage.connect(_on_kitchen_ingredient_shortage)
 	_connect_controls()
 	day_remaining = day_duration_seconds
 	spawn_timer = 0.4
@@ -137,11 +147,15 @@ func _collect_world_objects() -> void:
 
 	for node in $Seats.get_children():
 		if node is BuffetSeat:
-			seats.append(node as BuffetSeat)
+			var seat := node as BuffetSeat
+			seats.append(seat)
+			seat.became_dirty.connect(_on_seat_became_dirty)
 
 func _register_initial_inventory_cost() -> void:
+	food_cost = pantry.get_initial_purchase_cost()
 	for station in stations:
-		food_cost += station.stock * station.cost_per_unit
+		opening_prepared_food_cost += station.stock * station.cost_per_unit
+	food_cost += opening_prepared_food_cost
 
 func _connect_controls() -> void:
 	ac_switch_button.pressed.connect(_on_ac_switch_pressed)
@@ -150,6 +164,10 @@ func _connect_controls() -> void:
 	speed_1_button.pressed.connect(func(): _set_speed(1.0))
 	speed_2_button.pressed.connect(func(): _set_speed(2.0))
 	speed_3_button.pressed.connect(func(): _set_speed(3.0))
+	priority_auto_button.pressed.connect(func(): _set_kitchen_priority("auto"))
+	priority_staple_button.pressed.connect(func(): _set_kitchen_priority("staple"))
+	priority_meat_button.pressed.connect(func(): _set_kitchen_priority("meat"))
+	priority_seafood_button.pressed.connect(func(): _set_kitchen_priority("seafood"))
 
 func _update_day(delta: float) -> void:
 	if day_remaining > 0.0:
@@ -322,8 +340,14 @@ func _on_ticket_paid(customer: BuffetCustomer, amount: float) -> void:
 func _on_portion_taken(_customer: BuffetCustomer, cost: float) -> void:
 	consumed_food_cost += cost
 
-func _on_kitchen_batch_prepared(_station_name: String, _units: float, cost: float) -> void:
-	food_cost += cost
+func _on_kitchen_batch_prepared(_station_name: String, _food_units: float, _raw_units: float) -> void:
+	pass
+
+func _on_kitchen_ingredient_shortage(station_name: String, _ingredient_id: String) -> void:
+	last_review = station_name + "原料耗尽，无法继续补菜"
+
+func _on_seat_became_dirty(seat: BuffetSeat) -> void:
+	service_worker.enqueue_clean(seat)
 
 func _on_customer_finished(customer: BuffetCustomer, result: Dictionary) -> void:
 	finished_today += 1
@@ -390,6 +414,10 @@ func _set_speed(multiplier: float) -> void:
 	Engine.time_scale = multiplier
 	_update_control_labels()
 
+func _set_kitchen_priority(food_tag: String) -> void:
+	kitchen.set_priority(food_tag)
+	_update_control_labels()
+
 func _update_control_labels() -> void:
 	ac_switch_button.text = "空调：" + ("开" if ac_enabled else "关")
 	temp_down_button.text = "温度-"
@@ -397,6 +425,10 @@ func _update_control_labels() -> void:
 	speed_1_button.text = "1×" + ("●" if selected_speed == 1.0 else "")
 	speed_2_button.text = "2×" + ("●" if selected_speed == 2.0 else "")
 	speed_3_button.text = "3×" + ("●" if selected_speed == 3.0 else "")
+	priority_auto_button.text = "自动" + ("●" if kitchen.priority_tag == "auto" else "")
+	priority_staple_button.text = "主食" + ("●" if kitchen.priority_tag == "staple" else "")
+	priority_meat_button.text = "肉类" + ("●" if kitchen.priority_tag == "meat" else "")
+	priority_seafood_button.text = "海鲜" + ("●" if kitchen.priority_tag == "seafood" else "")
 
 func _update_debug_ui() -> void:
 	stats_label.text = "时间 %02d秒｜进店 %d/%d｜店内 %d｜收银 %d｜等座 %d｜厕所 %d" % [
@@ -431,4 +463,6 @@ func _update_debug_ui() -> void:
 		ac_setpoint
 	]
 	kitchen_label.text = kitchen.get_status()
+	pantry_label.text = pantry.get_inventory_text()
+	staff_label.text = service_worker.get_status()
 	review_label.text = "最新评价：" + last_review
