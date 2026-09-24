@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="128" viewBox="0 0 96 128">
+  <defs>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f1c7a8"/><stop offset="1" stop-color="#dca889"/></linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f0eee8"/><stop offset="1" stop-color="#f0eee8" stop-opacity=".78"/></linearGradient>
+  </defs>
+  <ellipse cx="48" cy="116" rx="18" ry="5" fill="#4a3e38" opacity=".18"/>
+  <g stroke="#5a4a42" stroke-width="1.2" stroke-linejoin="round">
+    <path d="M39 91 L47 91 L45 113 L35 113 Z" fill="#555a5e"/>
+    <path d="M49 85 L57 85 L61 113 L51 113 Z" fill="#555a5e"/>
+    <path d="M34 115 L46 115 L45 117 L31 117 Z" fill="#4b403b"/>
+    <path d="M50 109 L62 109 L65 117 L51 117 Z" fill="#4b403b"/>
+    <path d="M36 55 Q48 48 60 55 L63 89 Q48 96 33 89 Z" fill="url(#shirt)"/>
+    <path d="M35 56 L27 80 L32 83 L42 63 Z" fill="url(#skin)"/>
+    <path d="M61 60 L69 84 L64 87 L54 63 Z" fill="url(#skin)"/>
+    <ellipse cx="48" cy="38" rx="14" ry="17" fill="url(#skin)"/>
+    <path d="M35 25 Q48 14 61 25 L59 44 Q48 49 37 44 Z" fill="#4a3930"/>
+    
+    <path d="M36 60 L60 60 L63 91 Q48 97 33 91 Z" fill="#dcd7cb" opacity="0.96"/>
+    <path d="M34 22 Q48 8 62 22 L59 29 L37 29 Z" fill="#f5f2e9" stroke="#d8d2c6" stroke-width="1"/>
+  </g>
+</svg>
