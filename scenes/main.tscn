@@ -286,7 +286,7 @@ position = Vector2(315, 445)
 position = Vector2(330, 1125)
 
 [node name="CashierCounter" type="Marker2D" parent="Points"]
-position = Vector2(150, 460)
+position = Vector2(285, 352)
 
 [node name="TableWait" type="Marker2D" parent="Points"]
 position = Vector2(75, 620)
