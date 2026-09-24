@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/chef_worker.gd" id="1_chef"]
 [ext_resource type="Script" path="res://scripts/actor_visual.gd" id="2_visual"]
