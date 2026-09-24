@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/restroom_door.svg" id="12_restroom"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/buffet_station.svg" id="13_station"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/table_double.svg" id="14_table"]
+[ext_resource type="Script" path="res://scripts/runtime_diagnostics.gd" id="15_diag"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -52,6 +53,9 @@ size = Vector2(130, 76)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
+
+[node name="RuntimeDiagnostics" type="Node" parent="."]
+script = ExtResource("15_diag")
 
 [node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
 navigation_polygon = SubResource("NavigationPolygon_main")
@@ -362,7 +366,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.7｜第一套垂直切片"
+text = "自助餐 v0.8｜验证与稳定性"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
@@ -417,6 +421,12 @@ label_settings = SubResource("LabelSettings_main")
 [node name="ReviewLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
 text = "最新评价"
+horizontal_alignment = 1
+label_settings = SubResource("LabelSettings_main")
+
+[node name="DiagnosticsLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+layout_mode = 2
+text = "诊断：启动中"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
