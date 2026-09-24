@@ -1,31 +1,27 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="Script" path="res://scripts/customer.gd" id="2_customer"]
-[ext_resource type="Script" path="res://scripts/food_station.gd" id="3_food"]
-[ext_resource type="Script" path="res://scripts/seat.gd" id="4_seat"]
+[ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
+[ext_resource type="Script" path="res://scripts/seat.gd" id="3_seat"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
-vertices = PackedVector2Array(40, 150, 500, 150, 500, 850, 40, 850)
+vertices = PackedVector2Array(45, 180, 675, 180, 675, 1180, 45, 1180)
 polygons = [PackedInt32Array(0, 1, 2, 3)]
 
-[sub_resource type="RectangleShape2D" id="RectCustomer"]
-size = Vector2(28, 28)
-
 [sub_resource type="StyleBoxFlat" id="PanelStyle"]
-bg_color = Color(0.95, 0.93, 0.86, 1)
+bg_color = Color(0.95, 0.93, 0.86, 0.96)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.28, 0.24, 0.18, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="LabelSettings" id="LabelSettings_main"]
-font_size = 18
+font_size = 20
 font_color = Color(0.12, 0.10, 0.08, 1)
 
 [node name="Main" type="Node2D"]
@@ -35,75 +31,124 @@ script = ExtResource("1_main")
 navigation_polygon = SubResource("NavigationPolygon_main")
 
 [node name="Floor" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(40, 150, 500, 150, 500, 850, 40, 850)
+polygon = PackedVector2Array(45, 180, 675, 180, 675, 1180, 45, 1180)
 color = Color(0.82, 0.75, 0.62, 1)
 
 [node name="CashierBlock" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(65, 210, 185, 210, 185, 275, 65, 275)
-color = Color(0.45, 0.31, 0.2, 1)
+polygon = PackedVector2Array(70, 245, 245, 245, 245, 340, 70, 340)
+color = Color(0.45, 0.31, 0.20, 1)
 
-[node name="FoodStation" type="Node2D" parent="."]
-position = Vector2(390, 310)
-script = ExtResource("3_food")
-capacity = 8
-starting_stock = 8
-satiation_per_portion = 28.0
+[node name="FoodStations" type="Node2D" parent="."]
 
-[node name="Body" type="Polygon2D" parent="FoodStation"]
-polygon = PackedVector2Array(-75, -34, 75, -34, 75, 34, -75, 34)
-color = Color(0.68, 0.38, 0.2, 1)
+[node name="StapleStation" type="Node2D" parent="FoodStations"]
+position = Vector2(545, 330)
+script = ExtResource("2_food")
+station_name = "主食台"
+food_tag = "staple"
+capacity = 18.0
+starting_stock = 18.0
+satiation_per_unit = 24.0
+perceived_value_per_unit = 5.0
+cost_per_unit = 1.4
+
+[node name="Body" type="Polygon2D" parent="FoodStations/StapleStation"]
+polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
+color = Color(0.71, 0.55, 0.29, 1)
+
+[node name="MeatStation" type="Node2D" parent="FoodStations"]
+position = Vector2(545, 485)
+script = ExtResource("2_food")
+station_name = "烤肉台"
+food_tag = "meat"
+capacity = 16.0
+starting_stock = 16.0
+satiation_per_unit = 17.0
+perceived_value_per_unit = 18.0
+cost_per_unit = 7.5
+
+[node name="Body" type="Polygon2D" parent="FoodStations/MeatStation"]
+polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
+color = Color(0.67, 0.32, 0.22, 1)
+
+[node name="SeafoodStation" type="Node2D" parent="FoodStations"]
+position = Vector2(545, 640)
+script = ExtResource("2_food")
+station_name = "海鲜台"
+food_tag = "seafood"
+capacity = 14.0
+starting_stock = 14.0
+satiation_per_unit = 10.0
+perceived_value_per_unit = 16.0
+cost_per_unit = 6.2
+
+[node name="Body" type="Polygon2D" parent="FoodStations/SeafoodStation"]
+polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
+color = Color(0.25, 0.55, 0.63, 1)
 
 [node name="Seats" type="Node2D" parent="."]
 
 [node name="SeatA" type="Node2D" parent="Seats"]
-position = Vector2(190, 535)
-script = ExtResource("4_seat")
-
+position = Vector2(215, 665)
+script = ExtResource("3_seat")
 [node name="Body" type="Polygon2D" parent="Seats/SeatA"]
-polygon = PackedVector2Array(-48, -34, 48, -34, 48, 34, -48, 34)
+polygon = PackedVector2Array(-55, -35, 55, -35, 55, 35, -55, 35)
 color = Color(0.37, 0.25, 0.16, 1)
 
 [node name="SeatB" type="Node2D" parent="Seats"]
-position = Vector2(365, 585)
-script = ExtResource("4_seat")
-
+position = Vector2(365, 735)
+script = ExtResource("3_seat")
 [node name="Body" type="Polygon2D" parent="Seats/SeatB"]
-polygon = PackedVector2Array(-48, -34, 48, -34, 48, 34, -48, 34)
+polygon = PackedVector2Array(-55, -35, 55, -35, 55, 35, -55, 35)
+color = Color(0.37, 0.25, 0.16, 1)
+
+[node name="SeatC" type="Node2D" parent="Seats"]
+position = Vector2(215, 835)
+script = ExtResource("3_seat")
+[node name="Body" type="Polygon2D" parent="Seats/SeatC"]
+polygon = PackedVector2Array(-55, -35, 55, -35, 55, 35, -55, 35)
+color = Color(0.37, 0.25, 0.16, 1)
+
+[node name="SeatD" type="Node2D" parent="Seats"]
+position = Vector2(365, 905)
+script = ExtResource("3_seat")
+[node name="Body" type="Polygon2D" parent="Seats/SeatD"]
+polygon = PackedVector2Array(-55, -35, 55, -35, 55, 35, -55, 35)
+color = Color(0.37, 0.25, 0.16, 1)
+
+[node name="SeatE" type="Node2D" parent="Seats"]
+position = Vector2(215, 1005)
+script = ExtResource("3_seat")
+[node name="Body" type="Polygon2D" parent="Seats/SeatE"]
+polygon = PackedVector2Array(-55, -35, 55, -35, 55, 35, -55, 35)
+color = Color(0.37, 0.25, 0.16, 1)
+
+[node name="SeatF" type="Node2D" parent="Seats"]
+position = Vector2(365, 1070)
+script = ExtResource("3_seat")
+[node name="Body" type="Polygon2D" parent="Seats/SeatF"]
+polygon = PackedVector2Array(-55, -35, 55, -35, 55, 35, -55, 35)
 color = Color(0.37, 0.25, 0.16, 1)
 
 [node name="Points" type="Node2D" parent="."]
 
 [node name="Entrance" type="Marker2D" parent="Points"]
-position = Vector2(270, 790)
+position = Vector2(340, 1140)
 
-[node name="Cashier" type="Marker2D" parent="Points"]
-position = Vector2(130, 305)
+[node name="CashierCounter" type="Marker2D" parent="Points"]
+position = Vector2(160, 370)
 
 [node name="Exit" type="Marker2D" parent="Points"]
-position = Vector2(450, 790)
+position = Vector2(620, 1140)
 
-[node name="Customer" type="CharacterBody2D" parent="."]
-position = Vector2(270, 810)
-script = ExtResource("2_customer")
-
-[node name="Body" type="Polygon2D" parent="Customer"]
-polygon = PackedVector2Array(-14, -14, 14, -14, 14, 14, -14, 14)
-color = Color(0.25, 0.49, 0.78, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Customer"]
-shape = SubResource("RectCustomer")
-
-[node name="NavigationAgent2D" type="NavigationAgent2D" parent="Customer"]
-path_desired_distance = 6.0
-target_desired_distance = 10.0
+[node name="CustomerLayer" type="Node2D" parent="."]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="UI" type="PanelContainer" parent="CanvasLayer"]
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 520.0
-offset_bottom = 140.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 696.0
+offset_bottom = 160.0
 theme_override_styles/panel = SubResource("PanelStyle")
 
 [node name="VBox" type="VBoxContainer" parent="CanvasLayer/UI"]
@@ -111,30 +156,30 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐灰盒原型 v0.2"
+text = "自助餐灰盒原型 v0.3｜720×1280"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
-[node name="StateLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+[node name="StatsLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "顾客状态：初始化"
+text = "营业数据"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
-[node name="FullnessLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+[node name="EconomyLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "饱食度：0%"
+text = "经济数据"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="StockLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "餐台库存：8 / 8"
+text = "餐台库存"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
-[node name="SeatLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+[node name="StatusLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "座位占用：0 / 2"
+text = "准备营业"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
