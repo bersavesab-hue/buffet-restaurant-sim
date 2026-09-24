@@ -12,19 +12,23 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 @onready var kitchen: KitchenSystem = $Kitchen
 @onready var pantry: PantrySystem = $Pantry
 @onready var service_worker: ServiceWorker = $Staff/ServiceWorker
+@onready var chef_worker: ChefWorker = $Staff/ChefWorker
+
 @onready var cashier_counter: Marker2D = $Points/CashierCounter
-@onready var seat_wait_point: Marker2D = $Points/SeatWait
+@onready var table_wait_point: Marker2D = $Points/TableWait
 @onready var restroom_queue_point: Marker2D = $Points/RestroomQueue
 @onready var restroom_use_point: Marker2D = $Points/RestroomUse
+@onready var chef_prep_point: Marker2D = $Points/ChefPrep
 @onready var entrance: Marker2D = $Points/Entrance
 @onready var exit_point: Marker2D = $Points/Exit
 
 @onready var stats_label: Label = $CanvasLayer/UI/VBox/StatsLabel
 @onready var economy_label: Label = $CanvasLayer/UI/VBox/EconomyLabel
 @onready var stock_label: Label = $CanvasLayer/UI/VBox/StockLabel
+@onready var pantry_label: Label = $CanvasLayer/UI/VBox/PantryLabel
 @onready var environment_label: Label = $CanvasLayer/UI/VBox/EnvironmentLabel
 @onready var kitchen_label: Label = $CanvasLayer/UI/VBox/KitchenLabel
-@onready var pantry_label: Label = $CanvasLayer/UI/VBox/PantryLabel
+@onready var chef_label: Label = $CanvasLayer/UI/VBox/ChefLabel
 @onready var staff_label: Label = $CanvasLayer/UI/VBox/StaffLabel
 @onready var review_label: Label = $CanvasLayer/UI/VBox/ReviewLabel
 @onready var status_label: Label = $CanvasLayer/UI/VBox/StatusLabel
@@ -35,41 +39,46 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 @onready var speed_1_button: Button = $CanvasLayer/Controls/HBox/Speed1
 @onready var speed_2_button: Button = $CanvasLayer/Controls/HBox/Speed2
 @onready var speed_3_button: Button = $CanvasLayer/Controls/HBox/Speed3
+
 @onready var priority_auto_button: Button = $CanvasLayer/PriorityControls/HBox/Auto
 @onready var priority_staple_button: Button = $CanvasLayer/PriorityControls/HBox/Staple
 @onready var priority_meat_button: Button = $CanvasLayer/PriorityControls/HBox/Meat
 @onready var priority_seafood_button: Button = $CanvasLayer/PriorityControls/HBox/Seafood
 
+@onready var supply_staple_button: Button = $CanvasLayer/SupplyControls/HBox/Staple
+@onready var supply_meat_button: Button = $CanvasLayer/SupplyControls/HBox/Meat
+@onready var supply_seafood_button: Button = $CanvasLayer/SupplyControls/HBox/Seafood
+
 var stations: Array[FoodStation] = []
-var seats: Array[BuffetSeat] = []
+var tables: Array[BuffetTable] = []
 var active_customers: Array[BuffetCustomer] = []
 var cashier_queue: Array[BuffetCustomer] = []
-var seat_wait_queue: Array[BuffetCustomer] = []
+var table_wait_queue: Array[BuffetCustomer] = []
 var restroom_queue: Array[BuffetCustomer] = []
 
 var cashier_service_customer: BuffetCustomer
 var restroom_service_customer: BuffetCustomer
 
-var day_remaining: float = 0.0
-var spawn_timer: float = 0.0
-var spawned_today: int = 0
-var finished_today: int = 0
+var day_remaining := 0.0
+var spawn_timer := 0.0
+var spawned_today := 0
+var finished_today := 0
 
-var ticket_revenue: float = 0.0
-var food_cost: float = 0.0
-var consumed_food_cost: float = 0.0
-var opening_prepared_food_cost: float = 0.0
-var utility_cost: float = 0.0
+var ticket_revenue := 0.0
+var food_cost := 0.0
+var consumed_food_cost := 0.0
+var opening_prepared_food_cost := 0.0
+var utility_cost := 0.0
 
-var total_payback_ratio: float = 0.0
-var total_rating: float = 0.0
-var last_review: String = "暂无评价"
+var total_payback_ratio := 0.0
+var total_rating := 0.0
+var last_review := "暂无评价"
 
-var indoor_temperature: float = 29.0
-var heat_load: float = 0.0
+var indoor_temperature := 29.0
+var heat_load := 0.0
 var ac_enabled := true
-var ac_setpoint: float = 24.0
-var selected_speed: float = 1.0
+var ac_setpoint := 24.0
+var selected_speed := 1.0
 
 var day_settled := false
 var rng := RandomNumberGenerator.new()
@@ -118,6 +127,7 @@ func _ready() -> void:
 	kitchen.setup(stations, pantry)
 	kitchen.batch_prepared.connect(_on_kitchen_batch_prepared)
 	kitchen.ingredient_shortage.connect(_on_kitchen_ingredient_shortage)
+	chef_worker.setup(kitchen, chef_prep_point.global_position)
 	_connect_controls()
 	day_remaining = day_duration_seconds
 	spawn_timer = 0.4
@@ -135,7 +145,8 @@ func _process(delta: float) -> void:
 		_update_customer_environment()
 		_update_day(delta)
 		_update_cashier_queue()
-		_update_seat_queue()
+		_update_food_station_queues()
+		_update_table_queue()
 		_update_restroom_queue()
 
 	_update_debug_ui()
@@ -145,11 +156,11 @@ func _collect_world_objects() -> void:
 		if node is FoodStation:
 			stations.append(node as FoodStation)
 
-	for node in $Seats.get_children():
-		if node is BuffetSeat:
-			var seat := node as BuffetSeat
-			seats.append(seat)
-			seat.became_dirty.connect(_on_seat_became_dirty)
+	for node in $Tables.get_children():
+		if node is BuffetTable:
+			var table := node as BuffetTable
+			tables.append(table)
+			table.became_dirty.connect(_on_table_became_dirty)
 
 func _register_initial_inventory_cost() -> void:
 	food_cost = pantry.get_initial_purchase_cost()
@@ -164,10 +175,15 @@ func _connect_controls() -> void:
 	speed_1_button.pressed.connect(func(): _set_speed(1.0))
 	speed_2_button.pressed.connect(func(): _set_speed(2.0))
 	speed_3_button.pressed.connect(func(): _set_speed(3.0))
+
 	priority_auto_button.pressed.connect(func(): _set_kitchen_priority("auto"))
 	priority_staple_button.pressed.connect(func(): _set_kitchen_priority("staple"))
 	priority_meat_button.pressed.connect(func(): _set_kitchen_priority("meat"))
 	priority_seafood_button.pressed.connect(func(): _set_kitchen_priority("seafood"))
+
+	supply_staple_button.pressed.connect(func(): _toggle_station_refill("staple"))
+	supply_meat_button.pressed.connect(func(): _toggle_station_refill("meat"))
+	supply_seafood_button.pressed.connect(func(): _toggle_station_refill("seafood"))
 
 func _update_day(delta: float) -> void:
 	if day_remaining > 0.0:
@@ -191,7 +207,8 @@ func _spawn_customer() -> void:
 	customer.state_changed.connect(_on_customer_state_changed)
 	customer.metrics_changed.connect(_on_customer_metrics_changed)
 	customer.cashier_requested.connect(_on_cashier_requested)
-	customer.seat_requested.connect(_on_seat_requested)
+	customer.food_station_requested.connect(_on_food_station_requested)
+	customer.table_requested.connect(_on_table_requested)
 	customer.restroom_requested.connect(_on_restroom_requested)
 	customer.restroom_released.connect(_on_restroom_released)
 	customer.ticket_paid.connect(_on_ticket_paid)
@@ -204,7 +221,7 @@ func _spawn_customer() -> void:
 		entrance.global_position,
 		exit_point.global_position,
 		stations,
-		seats,
+		tables,
 		profile,
 		ticket_price
 	)
@@ -238,9 +255,7 @@ func _update_cashier_queue() -> void:
 			break
 		cashier_queue.remove_at(0)
 
-	if cashier_service_customer != null:
-		return
-	if cashier_queue.is_empty():
+	if cashier_service_customer != null or cashier_queue.is_empty():
 		return
 
 	var first := cashier_queue[0]
@@ -257,44 +272,51 @@ func _refresh_cashier_queue_targets() -> void:
 		if is_instance_valid(customer) and customer.is_waiting_for_cashier():
 			customer.set_cashier_queue_target(start + Vector2(0.0, 54.0 * float(i)))
 
-func _on_seat_requested(customer: BuffetCustomer) -> void:
-	if not seat_wait_queue.has(customer):
-		seat_wait_queue.append(customer)
-	_refresh_seat_wait_targets()
-	_update_seat_queue()
+func _on_food_station_requested(customer: BuffetCustomer, station: FoodStation) -> void:
+	station.enqueue_customer(customer)
 
-func _update_seat_queue() -> void:
-	for i in range(seat_wait_queue.size() - 1, -1, -1):
-		var customer := seat_wait_queue[i]
-		if not is_instance_valid(customer) or not customer.is_waiting_for_seat():
-			seat_wait_queue.remove_at(i)
+func _update_food_station_queues() -> void:
+	for station in stations:
+		station.update_queue_service()
+
+func _on_table_requested(customer: BuffetCustomer) -> void:
+	if not table_wait_queue.has(customer):
+		table_wait_queue.append(customer)
+	_refresh_table_wait_targets()
+	_update_table_queue()
+
+func _update_table_queue() -> void:
+	for i in range(table_wait_queue.size() - 1, -1, -1):
+		var customer := table_wait_queue[i]
+		if not is_instance_valid(customer) or not customer.is_waiting_for_table():
+			table_wait_queue.remove_at(i)
 
 	var assigned := true
-	while assigned and not seat_wait_queue.is_empty():
+	while assigned and not table_wait_queue.is_empty():
 		assigned = false
-		var seat := _find_available_seat()
-		if seat == null:
+		var table := _find_available_table()
+		if table == null:
 			break
-		var customer := seat_wait_queue[0]
-		if seat.reserve(customer):
-			seat_wait_queue.remove_at(0)
-			customer.assign_seat(seat)
+		var customer := table_wait_queue[0]
+		if table.reserve(customer):
+			table_wait_queue.remove_at(0)
+			customer.assign_table(table)
 			assigned = true
 
-	_refresh_seat_wait_targets()
+	_refresh_table_wait_targets()
 
-func _find_available_seat() -> BuffetSeat:
-	for seat in seats:
-		if seat.is_available():
-			return seat
+func _find_available_table() -> BuffetTable:
+	for table in tables:
+		if table.has_available_seat():
+			return table
 	return null
 
-func _refresh_seat_wait_targets() -> void:
-	for i in range(seat_wait_queue.size()):
-		var customer := seat_wait_queue[i]
-		if is_instance_valid(customer) and customer.is_waiting_for_seat():
-			customer.set_seat_wait_target(
-				seat_wait_point.global_position + Vector2(0.0, 46.0 * float(i))
+func _refresh_table_wait_targets() -> void:
+	for i in range(table_wait_queue.size()):
+		var customer := table_wait_queue[i]
+		if is_instance_valid(customer) and customer.is_waiting_for_table():
+			customer.set_table_wait_target(
+				table_wait_point.global_position + Vector2(0.0, 46.0 * float(i))
 			)
 
 func _on_restroom_requested(customer: BuffetCustomer) -> void:
@@ -308,9 +330,7 @@ func _update_restroom_queue() -> void:
 		if not is_instance_valid(customer) or not customer.is_waiting_for_restroom():
 			restroom_queue.remove_at(i)
 
-	if restroom_service_customer != null:
-		return
-	if restroom_queue.is_empty():
+	if restroom_service_customer != null or restroom_queue.is_empty():
 		return
 
 	var first := restroom_queue[0]
@@ -346,8 +366,8 @@ func _on_kitchen_batch_prepared(_station_name: String, _food_units: float, _raw_
 func _on_kitchen_ingredient_shortage(station_name: String, _ingredient_id: String) -> void:
 	last_review = station_name + "原料耗尽，无法继续补菜"
 
-func _on_seat_became_dirty(seat: BuffetSeat) -> void:
-	service_worker.enqueue_clean(seat)
+func _on_table_became_dirty(table: BuffetTable) -> void:
+	service_worker.enqueue_clean(table)
 
 func _on_customer_finished(customer: BuffetCustomer, result: Dictionary) -> void:
 	finished_today += 1
@@ -357,8 +377,10 @@ func _on_customer_finished(customer: BuffetCustomer, result: Dictionary) -> void
 
 	active_customers.erase(customer)
 	cashier_queue.erase(customer)
-	seat_wait_queue.erase(customer)
+	table_wait_queue.erase(customer)
 	restroom_queue.erase(customer)
+	for station in stations:
+		station.remove_customer(customer)
 
 	if cashier_service_customer == customer:
 		cashier_service_customer = null
@@ -367,7 +389,7 @@ func _on_customer_finished(customer: BuffetCustomer, result: Dictionary) -> void
 
 	customer.queue_free()
 	_refresh_cashier_queue_targets()
-	_refresh_seat_wait_targets()
+	_refresh_table_wait_targets()
 	_refresh_restroom_queue_targets()
 
 func _on_customer_state_changed(_customer: BuffetCustomer, _label: String) -> void:
@@ -418,6 +440,19 @@ func _set_kitchen_priority(food_tag: String) -> void:
 	kitchen.set_priority(food_tag)
 	_update_control_labels()
 
+func _toggle_station_refill(food_tag: String) -> void:
+	for station in stations:
+		if station.food_tag == food_tag:
+			station.set_refill_enabled(not station.is_refill_enabled())
+			break
+	_update_control_labels()
+
+func _get_station_by_tag(food_tag: String) -> FoodStation:
+	for station in stations:
+		if station.food_tag == food_tag:
+			return station
+	return null
+
 func _update_control_labels() -> void:
 	ac_switch_button.text = "空调：" + ("开" if ac_enabled else "关")
 	temp_down_button.text = "温度-"
@@ -425,24 +460,52 @@ func _update_control_labels() -> void:
 	speed_1_button.text = "1×" + ("●" if selected_speed == 1.0 else "")
 	speed_2_button.text = "2×" + ("●" if selected_speed == 2.0 else "")
 	speed_3_button.text = "3×" + ("●" if selected_speed == 3.0 else "")
+
 	priority_auto_button.text = "自动" + ("●" if kitchen.priority_tag == "auto" else "")
 	priority_staple_button.text = "主食" + ("●" if kitchen.priority_tag == "staple" else "")
 	priority_meat_button.text = "肉类" + ("●" if kitchen.priority_tag == "meat" else "")
 	priority_seafood_button.text = "海鲜" + ("●" if kitchen.priority_tag == "seafood" else "")
 
+	var staple := _get_station_by_tag("staple")
+	var meat := _get_station_by_tag("meat")
+	var seafood := _get_station_by_tag("seafood")
+	if staple != null:
+		supply_staple_button.text = "主食补菜：" + ("开" if staple.is_refill_enabled() else "停")
+	if meat != null:
+		supply_meat_button.text = "肉类补菜：" + ("开" if meat.is_refill_enabled() else "停")
+	if seafood != null:
+		supply_seafood_button.text = "海鲜补菜：" + ("开" if seafood.is_refill_enabled() else "停")
+
+func _get_food_queue_total() -> int:
+	var total := 0
+	for station in stations:
+		total += station.get_queue_size()
+	return total
+
+func _get_table_stats() -> String:
+	var occupied := 0
+	var capacity := 0
+	var dirty := 0
+	for table in tables:
+		occupied += table.get_occupied_count()
+		capacity += table.get_capacity()
+		if table.is_dirty():
+			dirty += 1
+	return "%d/%d 脏桌%d" % [occupied, capacity, dirty]
+
 func _update_debug_ui() -> void:
-	stats_label.text = "时间 %02d秒｜进店 %d/%d｜店内 %d｜收银 %d｜等座 %d｜厕所 %d" % [
+	stats_label.text = "时间 %02d秒｜店内%d｜收银%d｜取餐%d｜等座%d｜厕所%d｜桌%s" % [
 		int(ceil(day_remaining)),
-		spawned_today,
-		max_customers_today,
 		active_customers.size(),
 		cashier_queue.size(),
-		seat_wait_queue.size(),
-		restroom_queue.size()
+		_get_food_queue_total(),
+		table_wait_queue.size(),
+		restroom_queue.size(),
+		_get_table_stats()
 	]
 
 	var profit := ticket_revenue - food_cost - utility_cost
-	economy_label.text = "门票 ¥%.1f｜备餐 ¥%.1f｜已吃成本 ¥%.1f｜电费 ¥%.1f｜利润 ¥%.1f" % [
+	economy_label.text = "门票¥%.1f｜采购+开台¥%.1f｜已吃成本¥%.1f｜电费¥%.1f｜利润¥%.1f" % [
 		ticket_revenue,
 		food_cost,
 		consumed_food_cost,
@@ -452,10 +515,11 @@ func _update_debug_ui() -> void:
 
 	var parts: Array[String] = []
 	for station in stations:
-		parts.append("%s %.1f/%.0f" % [station.station_name, station.stock, station.capacity])
-	stock_label.text = "餐台：" + " | ".join(parts)
+		parts.append(station.get_contribution_text())
+	stock_label.text = "餐台：" + " || ".join(parts)
 
-	environment_label.text = "室外 %.1f℃｜室内 %.1f℃｜热负荷 +%.1f℃｜空调 %s %.0f℃" % [
+	pantry_label.text = pantry.get_inventory_text()
+	environment_label.text = "室外%.1f℃｜室内%.1f℃｜热负荷+%.1f℃｜空调%s %.0f℃" % [
 		outdoor_temperature,
 		indoor_temperature,
 		heat_load,
@@ -463,6 +527,6 @@ func _update_debug_ui() -> void:
 		ac_setpoint
 	]
 	kitchen_label.text = kitchen.get_status()
-	pantry_label.text = pantry.get_inventory_text()
+	chef_label.text = chef_worker.get_status()
 	staff_label.text = service_worker.get_status()
 	review_label.text = "最新评价：" + last_review
