@@ -2,6 +2,8 @@ extends Node2D
 
 @onready var customer: BuffetCustomer = $Customer
 @onready var food_station: FoodStation = $FoodStation
+@onready var seat_a: BuffetSeat = $Seats/SeatA
+@onready var seat_b: BuffetSeat = $Seats/SeatB
 @onready var state_label: Label = $CanvasLayer/UI/VBox/StateLabel
 @onready var fullness_label: Label = $CanvasLayer/UI/VBox/FullnessLabel
 @onready var stock_label: Label = $CanvasLayer/UI/VBox/StockLabel
@@ -10,7 +12,8 @@ extends Node2D
 var seats: Array[BuffetSeat] = []
 
 func _ready() -> void:
-	seats = [$Seats/SeatA, $Seats/SeatB]
+	seats.append(seat_a)
+	seats.append(seat_b)
 	customer.state_changed.connect(_on_customer_state_changed)
 	customer.metrics_changed.connect(_on_customer_metrics_changed)
 	customer.finished.connect(_on_customer_finished)
