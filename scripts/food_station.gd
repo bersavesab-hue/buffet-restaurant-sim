@@ -37,3 +37,9 @@ func refill(units: float) -> float:
 	var before := stock
 	stock = clampf(stock + units, 0.0, capacity)
 	return stock - before
+
+func get_stock_ratio() -> float:
+	return clampf(stock / maxf(0.01, capacity), 0.0, 1.0)
+
+func get_remaining_capacity() -> float:
+	return maxf(0.0, capacity - stock)
