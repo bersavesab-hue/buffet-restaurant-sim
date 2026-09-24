@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -7,6 +7,13 @@
 [ext_resource type="Script" path="res://scripts/pantry.gd" id="5_pantry"]
 [ext_resource type="PackedScene" path="res://scenes/service_worker.tscn" id="6_staff"]
 [ext_resource type="PackedScene" path="res://scenes/chef_worker.tscn" id="7_chef"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/restaurant_floor.svg" id="8_floor"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/restaurant_backwall.svg" id="9_wall"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/cashier.svg" id="10_cashier"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/kitchen_counter.svg" id="11_kitchen"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/restroom_door.svg" id="12_restroom"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/buffet_station.svg" id="13_station"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/table_double.svg" id="14_table"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -49,13 +56,24 @@ script = ExtResource("1_main")
 [node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
 navigation_polygon = SubResource("NavigationPolygon_main")
 
-[node name="Floor" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
-color = Color(0.82, 0.75, 0.62, 1)
+[node name="FloorVisual" type="Sprite2D" parent="."]
+position = Vector2(360, 722)
+texture = ExtResource("8_floor")
+z_as_relative = false
+z_index = -1000
 
-[node name="CashierBlock" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(65, 310, 235, 310, 235, 395, 65, 395)
-color = Color(0.45, 0.31, 0.20, 1)
+[node name="BackWall" type="Sprite2D" parent="."]
+position = Vector2(360, 275)
+texture = ExtResource("9_wall")
+z_as_relative = false
+z_index = -900
+
+[node name="CashierVisual" type="Sprite2D" parent="."]
+position = Vector2(150, 333)
+texture = ExtResource("10_cashier")
+scale = Vector2(0.9, 0.9)
+z_as_relative = false
+z_index = 352
 
 [node name="CashierBody" type="StaticBody2D" parent="."]
 position = Vector2(150, 352)
@@ -68,9 +86,12 @@ radius = 92.0
 avoidance_enabled = true
 avoidance_layers = 1
 
-[node name="KitchenBlock" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(65, 455, 270, 455, 270, 565, 65, 565)
-color = Color(0.46, 0.45, 0.42, 1)
+[node name="KitchenVisual" type="Sprite2D" parent="."]
+position = Vector2(167, 477)
+texture = ExtResource("11_kitchen")
+scale = Vector2(0.9, 0.9)
+z_as_relative = false
+z_index = 510
 
 [node name="KitchenBody" type="StaticBody2D" parent="."]
 position = Vector2(167, 510)
@@ -83,9 +104,12 @@ radius = 112.0
 avoidance_enabled = true
 avoidance_layers = 1
 
-[node name="RestroomBlock" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(500, 930, 650, 930, 650, 1065, 500, 1065)
-color = Color(0.42, 0.58, 0.62, 1)
+[node name="RestroomVisual" type="Sprite2D" parent="."]
+position = Vector2(575, 925)
+texture = ExtResource("12_restroom")
+scale = Vector2(0.86, 0.86)
+z_as_relative = false
+z_index = 997
 
 [node name="RestroomBody" type="StaticBody2D" parent="."]
 position = Vector2(575, 997)
@@ -109,6 +133,8 @@ refill_threshold = 0.48
 [node name="FoodStations" type="Node2D" parent="."]
 
 [node name="StapleStation" type="Node2D" parent="FoodStations"]
+z_as_relative = false
+z_index = 355
 position = Vector2(555, 355)
 script = ExtResource("2_food")
 station_name = "主食台"
@@ -121,9 +147,10 @@ satiation_per_unit = 24.0
 perceived_value_per_unit = 5.0
 cost_per_unit = 1.4
 queue_direction = Vector2(-1, 0)
-[node name="Body" type="Polygon2D" parent="FoodStations/StapleStation"]
-polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
-color = Color(0.71, 0.55, 0.29, 1)
+[node name="Body" type="Sprite2D" parent="FoodStations/StapleStation"]
+position = Vector2(0, -18)
+texture = ExtResource("13_station")
+scale = Vector2(0.82, 0.82)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/StapleStation"]
 position = Vector2(-132, 0)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/StapleStation"]
@@ -139,6 +166,8 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="MeatStation" type="Node2D" parent="FoodStations"]
+z_as_relative = false
+z_index = 525
 position = Vector2(555, 525)
 script = ExtResource("2_food")
 station_name = "烤肉台"
@@ -151,9 +180,10 @@ satiation_per_unit = 17.0
 perceived_value_per_unit = 18.0
 cost_per_unit = 7.5
 queue_direction = Vector2(-1, 0)
-[node name="Body" type="Polygon2D" parent="FoodStations/MeatStation"]
-polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
-color = Color(0.67, 0.32, 0.22, 1)
+[node name="Body" type="Sprite2D" parent="FoodStations/MeatStation"]
+position = Vector2(0, -18)
+texture = ExtResource("13_station")
+scale = Vector2(0.82, 0.82)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/MeatStation"]
 position = Vector2(-132, 0)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/MeatStation"]
@@ -169,6 +199,8 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="SeafoodStation" type="Node2D" parent="FoodStations"]
+z_as_relative = false
+z_index = 695
 position = Vector2(555, 695)
 script = ExtResource("2_food")
 station_name = "海鲜台"
@@ -181,9 +213,10 @@ satiation_per_unit = 10.0
 perceived_value_per_unit = 16.0
 cost_per_unit = 6.2
 queue_direction = Vector2(-1, 0)
-[node name="Body" type="Polygon2D" parent="FoodStations/SeafoodStation"]
-polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
-color = Color(0.25, 0.55, 0.63, 1)
+[node name="Body" type="Sprite2D" parent="FoodStations/SeafoodStation"]
+position = Vector2(0, -18)
+texture = ExtResource("13_station")
+scale = Vector2(0.82, 0.82)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
 position = Vector2(-132, 0)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
@@ -201,12 +234,15 @@ avoidance_layers = 1
 [node name="Tables" type="Node2D" parent="."]
 
 [node name="TableA" type="Node2D" parent="Tables"]
+z_as_relative = false
+z_index = 705
 position = Vector2(185, 705)
 script = ExtResource("3_table")
 table_name = "A桌"
-[node name="Body" type="Polygon2D" parent="Tables/TableA"]
-polygon = PackedVector2Array(-65, -38, 65, -38, 65, 38, -65, 38)
-color = Color(0.37, 0.25, 0.16, 1)
+[node name="Body" type="Sprite2D" parent="Tables/TableA"]
+position = Vector2(0, -22)
+texture = ExtResource("14_table")
+scale = Vector2(0.82, 0.82)
 [node name="SeatPoints" type="Node2D" parent="Tables/TableA"]
 [node name="Seat1" type="Marker2D" parent="Tables/TableA/SeatPoints"]
 position = Vector2(0, -92)
@@ -225,12 +261,15 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="TableB" type="Node2D" parent="Tables"]
+z_as_relative = false
+z_index = 820
 position = Vector2(350, 820)
 script = ExtResource("3_table")
 table_name = "B桌"
-[node name="Body" type="Polygon2D" parent="Tables/TableB"]
-polygon = PackedVector2Array(-65, -38, 65, -38, 65, 38, -65, 38)
-color = Color(0.37, 0.25, 0.16, 1)
+[node name="Body" type="Sprite2D" parent="Tables/TableB"]
+position = Vector2(0, -22)
+texture = ExtResource("14_table")
+scale = Vector2(0.82, 0.82)
 [node name="SeatPoints" type="Node2D" parent="Tables/TableB"]
 [node name="Seat1" type="Marker2D" parent="Tables/TableB/SeatPoints"]
 position = Vector2(0, -92)
@@ -249,12 +288,15 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="TableC" type="Node2D" parent="Tables"]
+z_as_relative = false
+z_index = 945
 position = Vector2(185, 945)
 script = ExtResource("3_table")
 table_name = "C桌"
-[node name="Body" type="Polygon2D" parent="Tables/TableC"]
-polygon = PackedVector2Array(-65, -38, 65, -38, 65, 38, -65, 38)
-color = Color(0.37, 0.25, 0.16, 1)
+[node name="Body" type="Sprite2D" parent="Tables/TableC"]
+position = Vector2(0, -22)
+texture = ExtResource("14_table")
+scale = Vector2(0.82, 0.82)
 [node name="SeatPoints" type="Node2D" parent="Tables/TableC"]
 [node name="Seat1" type="Marker2D" parent="Tables/TableC/SeatPoints"]
 position = Vector2(0, -92)
@@ -320,7 +362,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐灰盒原型 v0.6｜垂直切片准备"
+text = "自助餐 v0.7｜第一套垂直切片"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
