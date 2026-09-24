@@ -93,7 +93,7 @@ func _on_velocity_computed(safe_velocity: Vector2) -> void:
 
 func _start_next_task() -> void:
 	while not task_queue.is_empty():
-		var table := task_queue.pop_front()
+		var table: BuffetTable = task_queue.pop_front() as BuffetTable
 		if is_instance_valid(table) and table.is_dirty():
 			current_table = table
 			state = State.MOVING_TO_TABLE
