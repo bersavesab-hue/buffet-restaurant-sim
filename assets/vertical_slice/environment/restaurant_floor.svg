@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="900" viewBox="0 0 720 900">
+<rect width="720" height="900" fill="#d8c7aa"/>
+<defs><pattern id="p" width="128" height="64" patternUnits="userSpaceOnUse">
+<path d="M64 0 L128 32 L64 64 L0 32 Z" fill="none" stroke="#bca98c" stroke-width="1"/>
+<path d="M32 16 L96 48 M96 16 L32 48" stroke="#c8b798" stroke-width=".8" opacity=".32"/>
+</pattern></defs>
+<rect width="720" height="900" fill="url(#p)"/>
+<rect x="0" y="0" width="720" height="900" fill="url(#grad)" opacity=".0"/>
+</svg>
