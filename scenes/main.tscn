@@ -145,9 +145,10 @@ position = Vector2(620, 1140)
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="UI" type="PanelContainer" parent="CanvasLayer"]
+anchor_right = 1.0
 offset_left = 24.0
 offset_top = 24.0
-offset_right = 696.0
+offset_right = -24.0
 offset_bottom = 160.0
 theme_override_styles/panel = SubResource("PanelStyle")
 
