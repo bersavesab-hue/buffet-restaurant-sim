@@ -15,6 +15,7 @@ enum State {
 @export var clean_seconds: float = 1.6
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
+@onready var visual: ActorVisual = $Visual
 
 var state: State = State.IDLE
 var task_queue: Array[BuffetTable] = []
@@ -38,6 +39,7 @@ func enqueue_clean(table: BuffetTable) -> void:
 		return
 	task_queue.append(table)
 	if state == State.IDLE:
+		visual.set_action("idle")
 		_start_next_task()
 
 func _physics_process(_delta: float) -> void:
@@ -49,10 +51,13 @@ func _physics_process(_delta: float) -> void:
 		state = State.COLLECTING
 		action_timer = collect_seconds
 		velocity = Vector2.ZERO
+		visual.set_motion(Vector2.ZERO)
+		visual.set_action("collect")
 		emit_signal("task_changed", "服务员：收盘")
 		return
 	var next_position := navigation_agent.get_next_path_position()
 	var desired_velocity := global_position.direction_to(next_position) * speed
+	visual.set_motion(desired_velocity)
 	if navigation_agent.avoidance_enabled:
 		navigation_agent.velocity = desired_velocity
 	else:
@@ -60,6 +65,7 @@ func _physics_process(_delta: float) -> void:
 		move_and_slide()
 
 func _process(delta: float) -> void:
+	z_index = int(global_position.y)
 	if state not in [State.COLLECTING, State.CLEANING]:
 		return
 	action_timer -= delta
@@ -67,6 +73,7 @@ func _process(delta: float) -> void:
 		return
 	if state == State.COLLECTING:
 		state = State.CLEANING
+		visual.set_action("clean")
 		action_timer = clean_seconds
 		emit_signal("task_changed", "服务员：擦桌")
 		return
@@ -74,12 +81,14 @@ func _process(delta: float) -> void:
 		current_table.mark_clean()
 	current_table = null
 	state = State.IDLE
+	visual.set_action("idle")
 	_start_next_task()
 
 func _on_velocity_computed(safe_velocity: Vector2) -> void:
 	if state != State.MOVING_TO_TABLE:
 		return
 	velocity = safe_velocity
+	visual.set_motion(safe_velocity)
 	move_and_slide()
 
 func _start_next_task() -> void:
@@ -88,6 +97,7 @@ func _start_next_task() -> void:
 		if is_instance_valid(table) and table.is_dirty():
 			current_table = table
 			state = State.MOVING_TO_TABLE
+			visual.set_action("idle")
 			navigation_agent.target_position = table.get_clean_position()
 			emit_signal("task_changed", "服务员：前往脏桌")
 			return
