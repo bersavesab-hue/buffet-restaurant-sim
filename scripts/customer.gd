@@ -280,13 +280,13 @@ func _set_state(next_state: State) -> void:
 			emit_signal("state_changed", self, "前往收银台")
 		State.FOOD:
 			if selected_station != null:
-				_set_target(selected_station.global_position)
+				_set_target(selected_station.get_service_position())
 				emit_signal("state_changed", self, "取餐：" + selected_station.station_name)
 		State.WAIT_SEAT:
 			_set_target(seat_wait_target)
 			emit_signal("state_changed", self, "等座")
 		State.SEAT:
-			_set_target(reserved_seat.global_position)
+			_set_target(reserved_seat.get_service_position())
 			emit_signal("state_changed", self, "回座")
 		State.EAT:
 			eat_timer = eat_seconds
