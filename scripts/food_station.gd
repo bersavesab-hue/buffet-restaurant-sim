@@ -10,10 +10,18 @@ extends Node2D
 @export var satiation_per_unit: float = 18.0
 @export var perceived_value_per_unit: float = 8.0
 @export var cost_per_unit: float = 3.0
+@export var queue_spacing: float = 46.0
+@export var queue_direction: Vector2 = Vector2(0, 1)
 
 @onready var service_point: Marker2D = get_node_or_null("ServicePoint") as Marker2D
+@onready var refill_point: Marker2D = get_node_or_null("RefillPoint") as Marker2D
 
 var stock: float = 0.0
+var refill_enabled := true
+var customer_queue: Array[Node] = []
+var total_units_taken := 0.0
+var total_cost_served := 0.0
+var total_perceived_value_served := 0.0
 
 func _ready() -> void:
 	stock = clampf(starting_stock, 0.0, capacity)
@@ -21,10 +29,66 @@ func _ready() -> void:
 func has_food(min_units: float = 0.25) -> bool:
 	return stock >= min_units
 
+func set_refill_enabled(value: bool) -> void:
+	refill_enabled = value
+
+func is_refill_enabled() -> bool:
+	return refill_enabled
+
 func get_service_position() -> Vector2:
 	if service_point != null:
 		return service_point.global_position
 	return global_position
+
+func get_refill_position() -> Vector2:
+	if refill_point != null:
+		return refill_point.global_position
+	return global_position
+
+func enqueue_customer(customer: Node) -> void:
+	if customer == null or customer_queue.has(customer):
+		return
+	customer_queue.append(customer)
+	_refresh_queue_targets()
+
+func remove_customer(customer: Node) -> void:
+	customer_queue.erase(customer)
+	_refresh_queue_targets()
+
+func update_queue_service() -> void:
+	_cleanup_queue()
+	if customer_queue.is_empty():
+		return
+	var customer := customer_queue[0]
+	if not has_food():
+		return
+	if customer.has_method("has_reached_food_queue_target") and customer.has_reached_food_queue_target(self):
+		customer_queue.remove_at(0)
+		if customer.has_method("begin_food_service"):
+			customer.begin_food_service(self)
+		_refresh_queue_targets()
+
+func _cleanup_queue() -> void:
+	for i in range(customer_queue.size() - 1, -1, -1):
+		var customer := customer_queue[i]
+		if not is_instance_valid(customer):
+			customer_queue.remove_at(i)
+		elif customer.has_method("is_waiting_for_food") and not customer.is_waiting_for_food(self):
+			customer_queue.remove_at(i)
+
+func _refresh_queue_targets() -> void:
+	var direction := queue_direction.normalized()
+	for i in range(customer_queue.size()):
+		var customer := customer_queue[i]
+		if not is_instance_valid(customer):
+			continue
+		var target := get_service_position() + direction * queue_spacing * float(i)
+		if customer.has_method("set_food_queue_target"):
+			customer.set_food_queue_target(self, target)
+
+func get_queue_size() -> int:
+	_cleanup_queue()
+	return customer_queue.size()
 
 func take_portion(requested_units: float) -> Dictionary:
 	if stock <= 0.0:
@@ -32,14 +96,19 @@ func take_portion(requested_units: float) -> Dictionary:
 
 	var actual_units := minf(stock, maxf(0.25, requested_units))
 	stock = maxf(0.0, stock - actual_units)
+	var actual_cost := cost_per_unit * actual_units
+	var actual_value := perceived_value_per_unit * actual_units
+	total_units_taken += actual_units
+	total_cost_served += actual_cost
+	total_perceived_value_served += actual_value
 
 	return {
 		"station_name": station_name,
 		"food_tag": food_tag,
 		"units": actual_units,
 		"satiation": satiation_per_unit * actual_units,
-		"perceived_value": perceived_value_per_unit * actual_units,
-		"cost": cost_per_unit * actual_units
+		"perceived_value": actual_value,
+		"cost": actual_cost
 	}
 
 func refill(units: float) -> float:
@@ -58,3 +127,14 @@ func raw_needed_for(food_units: float) -> float:
 
 func food_units_from_raw(raw_units: float) -> float:
 	return maxf(0.0, raw_units) / maxf(0.001, raw_units_per_food_unit)
+
+func get_contribution_text() -> String:
+	return "%s %.1f/%.0f 队%d｜成本%.1f 价值%.1f｜补菜%s" % [
+		station_name,
+		stock,
+		capacity,
+		get_queue_size(),
+		total_cost_served,
+		total_perceived_value_served,
+		("开" if refill_enabled else "停")
+	]
