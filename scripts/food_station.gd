@@ -62,10 +62,10 @@ func update_queue_service() -> void:
 	var customer := customer_queue[0]
 	if not has_food():
 		return
-	if customer.has_method("has_reached_food_queue_target") and customer.has_reached_food_queue_target(self):
+	if customer.has_method("has_reached_food_queue_target") and bool(customer.call("has_reached_food_queue_target", self)):
 		customer_queue.remove_at(0)
 		if customer.has_method("begin_food_service"):
-			customer.begin_food_service(self)
+			customer.call("begin_food_service", self)
 		_refresh_queue_targets()
 
 func _cleanup_queue() -> void:
@@ -73,7 +73,7 @@ func _cleanup_queue() -> void:
 		var customer := customer_queue[i]
 		if not is_instance_valid(customer):
 			customer_queue.remove_at(i)
-		elif customer.has_method("is_waiting_for_food") and not customer.is_waiting_for_food(self):
+		elif customer.has_method("is_waiting_for_food") and not bool(customer.call("is_waiting_for_food", self)):
 			customer_queue.remove_at(i)
 
 func _refresh_queue_targets() -> void:
@@ -84,7 +84,7 @@ func _refresh_queue_targets() -> void:
 			continue
 		var target := get_service_position() + direction * queue_spacing * float(i)
 		if customer.has_method("set_food_queue_target"):
-			customer.set_food_queue_target(self, target)
+			customer.call("set_food_queue_target", self, target)
 
 func get_queue_size() -> int:
 	_cleanup_queue()
