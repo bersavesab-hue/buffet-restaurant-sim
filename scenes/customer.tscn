@@ -14,6 +14,11 @@ collision_mask = 1
 polygon = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 color = Color(0.25, 0.49, 0.78, 1)
 
+[node name="Plate" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-13, 12, 13, 12, 16, 17, -16, 17)
+color = Color(0.94, 0.94, 0.90, 1)
+visible = false
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectCustomer")
 
