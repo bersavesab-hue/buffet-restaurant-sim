@@ -78,6 +78,7 @@ func setup(
 
 func _begin_navigation() -> void:
 	await get_tree().physics_frame
+	navigation_agent.velocity_computed.connect(_on_velocity_computed)
 	navigation_ready = true
 	_set_state(State.ENTER)
 
@@ -88,13 +89,25 @@ func _physics_process(_delta: float) -> void:
 		velocity = Vector2.ZERO
 		return
 
+	if NavigationServer2D.map_get_iteration_id(navigation_agent.get_navigation_map()) == 0:
+		return
+
 	if navigation_agent.is_navigation_finished():
 		_arrive()
 		return
 
 	var next_position := navigation_agent.get_next_path_position()
-	var direction := global_position.direction_to(next_position)
-	velocity = direction * speed
+	var desired_velocity := global_position.direction_to(next_position) * speed
+	if navigation_agent.avoidance_enabled:
+		navigation_agent.velocity = desired_velocity
+	else:
+		velocity = desired_velocity
+		move_and_slide()
+
+func _on_velocity_computed(safe_velocity: Vector2) -> void:
+	if state in [State.DONE, State.EAT, State.CASHIER_SERVICE]:
+		return
+	velocity = safe_velocity
 	move_and_slide()
 
 func _process(delta: float) -> void:
