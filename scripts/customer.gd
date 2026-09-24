@@ -4,6 +4,9 @@ extends CharacterBody2D
 signal state_changed(customer: BuffetCustomer, label: String)
 signal metrics_changed(customer: BuffetCustomer, fullness_ratio: float, payback_ratio: float)
 signal cashier_requested(customer: BuffetCustomer)
+signal seat_requested(customer: BuffetCustomer)
+signal restroom_requested(customer: BuffetCustomer)
+signal restroom_released(customer: BuffetCustomer)
 signal ticket_paid(customer: BuffetCustomer, amount: float)
 signal portion_taken(customer: BuffetCustomer, cost: float)
 signal finished(customer: BuffetCustomer, result: Dictionary)
@@ -14,8 +17,12 @@ enum State {
 	CASHIER,
 	CASHIER_SERVICE,
 	FOOD,
+	WAIT_SEAT,
 	SEAT,
 	EAT,
+	WAIT_RESTROOM,
+	RESTROOM,
+	RESTROOM_USE,
 	EXIT,
 	DONE
 }
@@ -23,6 +30,7 @@ enum State {
 @export var speed: float = 125.0
 @export var eat_seconds: float = 1.4
 @export var cashier_service_seconds: float = 0.75
+@export var restroom_use_seconds: float = 2.6
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var body: Polygon2D = $Body
@@ -31,7 +39,10 @@ var state: State = State.ENTER
 var entrance_position := Vector2.ZERO
 var exit_position := Vector2.ZERO
 var queue_target := Vector2.ZERO
+var seat_wait_target := Vector2.ZERO
+var restroom_queue_target := Vector2.ZERO
 var cashier_counter_position := Vector2.ZERO
+var restroom_position := Vector2.ZERO
 
 var stations: Array[FoodStation] = []
 var seats: Array[BuffetSeat] = []
@@ -48,8 +59,19 @@ var perceived_value: float = 0.0
 var rounds_taken: int = 0
 var max_rounds: int = 6
 
+var patience_max: float = 34.0
+var patience: float = 34.0
+var comfort_score: float = 100.0
+var current_temperature: float = 26.0
+var restroom_need: float = 0.0
+var restroom_threshold: float = 55.0
+var restroom_wait_seconds: float = 0.0
+var leave_after_restroom := false
+var last_issue: String = ""
+
 var eat_timer: float = 0.0
 var cashier_timer: float = 0.0
+var restroom_timer: float = 0.0
 var navigation_ready := false
 var rng := RandomNumberGenerator.new()
 
@@ -71,6 +93,9 @@ func setup(
 	portion_units = float(profile.get("portion_units", 1.0))
 	value_seeking = float(profile.get("value_seeking", 0.6))
 	max_rounds = int(profile.get("max_rounds", 6))
+	patience_max = float(profile.get("patience", 34.0))
+	patience = patience_max
+	restroom_threshold = float(profile.get("restroom_threshold", 55.0))
 	var tint: Color = profile.get("color", Color(0.25, 0.49, 0.78, 1.0))
 	body.color = tint
 	rng.randomize()
@@ -85,7 +110,7 @@ func _begin_navigation() -> void:
 func _physics_process(_delta: float) -> void:
 	if not navigation_ready:
 		return
-	if state in [State.DONE, State.EAT, State.CASHIER_SERVICE]:
+	if state in [State.DONE, State.EAT, State.CASHIER_SERVICE, State.RESTROOM_USE]:
 		velocity = Vector2.ZERO
 		return
 
@@ -105,12 +130,17 @@ func _physics_process(_delta: float) -> void:
 		move_and_slide()
 
 func _on_velocity_computed(safe_velocity: Vector2) -> void:
-	if state in [State.DONE, State.EAT, State.CASHIER_SERVICE]:
+	if state in [State.DONE, State.EAT, State.CASHIER_SERVICE, State.RESTROOM_USE]:
 		return
 	velocity = safe_velocity
 	move_and_slide()
 
 func _process(delta: float) -> void:
+	_update_comfort(delta)
+	_update_waiting_patience(delta)
+	if state in [State.EXIT, State.DONE]:
+		return
+
 	if state == State.EAT:
 		eat_timer -= delta
 		if eat_timer <= 0.0:
@@ -120,6 +150,40 @@ func _process(delta: float) -> void:
 		if cashier_timer <= 0.0:
 			emit_signal("ticket_paid", self, ticket_price)
 			_choose_next_food_or_leave()
+	elif state == State.RESTROOM_USE:
+		restroom_timer -= delta
+		if restroom_timer <= 0.0:
+			_finish_restroom_use()
+
+func update_environment(temperature: float) -> void:
+	current_temperature = temperature
+
+func _update_comfort(delta: float) -> void:
+	if state in [State.ENTER, State.DONE]:
+		return
+	var difference := absf(current_temperature - 24.0)
+	if difference <= 2.0:
+		comfort_score = minf(100.0, comfort_score + 0.22 * delta)
+	else:
+		comfort_score = maxf(0.0, comfort_score - (difference - 2.0) * 0.20 * delta)
+
+func _update_waiting_patience(delta: float) -> void:
+	if state not in [State.WAIT_CASHIER, State.WAIT_SEAT, State.WAIT_RESTROOM]:
+		return
+
+	patience = maxf(0.0, patience - delta)
+	if state == State.WAIT_RESTROOM:
+		restroom_wait_seconds += delta
+
+	if patience <= 0.0:
+		match state:
+			State.WAIT_CASHIER:
+				last_issue = "收银排队太久"
+			State.WAIT_SEAT:
+				last_issue = "等座太久"
+			State.WAIT_RESTROOM:
+				last_issue = "厕所排队太久"
+		_set_state(State.EXIT)
 
 func set_cashier_queue_target(target: Vector2) -> void:
 	queue_target = target
@@ -129,9 +193,41 @@ func set_cashier_queue_target(target: Vector2) -> void:
 func has_reached_queue_target() -> bool:
 	return state == State.WAIT_CASHIER and global_position.distance_to(queue_target) <= 16.0
 
+func is_waiting_for_cashier() -> bool:
+	return state == State.WAIT_CASHIER
+
 func begin_cashier_service(counter_position: Vector2) -> void:
 	cashier_counter_position = counter_position
 	_set_state(State.CASHIER)
+
+func set_seat_wait_target(target: Vector2) -> void:
+	seat_wait_target = target
+	if state == State.WAIT_SEAT:
+		_set_target(seat_wait_target)
+
+func is_waiting_for_seat() -> bool:
+	return state == State.WAIT_SEAT
+
+func assign_seat(seat: BuffetSeat) -> void:
+	if state != State.WAIT_SEAT:
+		return
+	reserved_seat = seat
+	_set_state(State.SEAT)
+
+func set_restroom_queue_target(target: Vector2) -> void:
+	restroom_queue_target = target
+	if state == State.WAIT_RESTROOM:
+		_set_target(restroom_queue_target)
+
+func has_reached_restroom_queue_target() -> bool:
+	return state == State.WAIT_RESTROOM and global_position.distance_to(restroom_queue_target) <= 16.0
+
+func is_waiting_for_restroom() -> bool:
+	return state == State.WAIT_RESTROOM
+
+func begin_restroom_use(target: Vector2) -> void:
+	restroom_position = target
+	_set_state(State.RESTROOM)
 
 func _arrive() -> void:
 	match state:
@@ -150,14 +246,24 @@ func _arrive() -> void:
 			if reserved_seat == null:
 				reserved_seat = _reserve_first_seat()
 			if reserved_seat == null:
-				_set_state(State.EXIT)
+				state = State.WAIT_SEAT
+				emit_signal("state_changed", self, "等待座位")
+				emit_signal("seat_requested", self)
 			else:
 				_set_state(State.SEAT)
+		State.WAIT_SEAT:
+			velocity = Vector2.ZERO
 		State.SEAT:
 			_set_state(State.EAT)
+		State.WAIT_RESTROOM:
+			velocity = Vector2.ZERO
+		State.RESTROOM:
+			state = State.RESTROOM_USE
+			restroom_timer = restroom_use_seconds
+			emit_signal("state_changed", self, "使用厕所")
 		State.EXIT:
 			_set_state(State.DONE)
-		State.EAT, State.CASHIER_SERVICE, State.DONE:
+		State.EAT, State.CASHIER_SERVICE, State.RESTROOM_USE, State.DONE:
 			pass
 
 func _set_state(next_state: State) -> void:
@@ -176,38 +282,45 @@ func _set_state(next_state: State) -> void:
 			if selected_station != null:
 				_set_target(selected_station.global_position)
 				emit_signal("state_changed", self, "取餐：" + selected_station.station_name)
+		State.WAIT_SEAT:
+			_set_target(seat_wait_target)
+			emit_signal("state_changed", self, "等座")
 		State.SEAT:
 			_set_target(reserved_seat.global_position)
 			emit_signal("state_changed", self, "回座")
 		State.EAT:
 			eat_timer = eat_seconds
 			emit_signal("state_changed", self, "吃饭")
+		State.WAIT_RESTROOM:
+			_set_target(restroom_queue_target)
+			emit_signal("state_changed", self, "厕所排队")
+		State.RESTROOM:
+			_set_target(restroom_position)
+			emit_signal("state_changed", self, "前往厕所")
+		State.RESTROOM_USE:
+			restroom_timer = restroom_use_seconds
+			emit_signal("state_changed", self, "使用厕所")
 		State.EXIT:
 			_release_seat()
 			_set_target(exit_position)
 			emit_signal("state_changed", self, "离店")
 		State.DONE:
 			emit_signal("state_changed", self, "完成")
-			var result := {
-				"profile_name": str(profile.get("name", "顾客")),
-				"fullness_ratio": get_fullness_ratio(),
-				"perceived_value": perceived_value,
-				"payback_ratio": get_payback_ratio(),
-				"rounds": rounds_taken
-			}
-			emit_signal("finished", self, result)
+			emit_signal("finished", self, _build_result())
 
 func _set_target(position: Vector2) -> void:
 	navigation_agent.target_position = position
 
 func _choose_next_food_or_leave() -> void:
 	if rounds_taken >= max_rounds or not _should_continue_eating():
-		_set_state(State.EXIT)
+		_leave_or_use_restroom()
 		return
 
 	selected_station = _select_station()
 	if selected_station == null:
-		_set_state(State.EXIT)
+		if last_issue.is_empty():
+			last_issue = "想吃的餐台没菜了"
+		_leave_or_use_restroom()
 		return
 
 	_set_state(State.FOOD)
@@ -244,16 +357,43 @@ func _take_food() -> void:
 	var request_units := portion_units * rng.randf_range(0.85, 1.15)
 	var portion := selected_station.take_portion(request_units)
 	if portion.is_empty():
+		if last_issue.is_empty():
+			last_issue = selected_station.station_name + "刚好空盘"
 		return
 
 	rounds_taken += 1
+	var actual_units := float(portion.get("units", 0.0))
 	fullness = minf(stomach_capacity, fullness + float(portion.get("satiation", 0.0)))
 	perceived_value += float(portion.get("perceived_value", 0.0))
+	restroom_need = minf(100.0, restroom_need + actual_units * rng.randf_range(10.0, 15.0))
 	emit_signal("portion_taken", self, float(portion.get("cost", 0.0)))
 	emit_signal("metrics_changed", self, get_fullness_ratio(), get_payback_ratio())
 
 func _after_eating() -> void:
-	_choose_next_food_or_leave()
+	if restroom_need >= restroom_threshold:
+		_request_restroom(false)
+	else:
+		_choose_next_food_or_leave()
+
+func _leave_or_use_restroom() -> void:
+	if restroom_need >= restroom_threshold * 0.85:
+		_request_restroom(true)
+	else:
+		_set_state(State.EXIT)
+
+func _request_restroom(leave_after: bool) -> void:
+	leave_after_restroom = leave_after
+	state = State.WAIT_RESTROOM
+	emit_signal("state_changed", self, "寻找厕所")
+	emit_signal("restroom_requested", self)
+
+func _finish_restroom_use() -> void:
+	restroom_need = 0.0
+	emit_signal("restroom_released", self)
+	if leave_after_restroom:
+		_set_state(State.EXIT)
+	else:
+		_choose_next_food_or_leave()
 
 func _should_continue_eating() -> bool:
 	var fullness_ratio := get_fullness_ratio()
@@ -275,6 +415,9 @@ func get_fullness_ratio() -> float:
 func get_payback_ratio() -> float:
 	return maxf(0.0, perceived_value / maxf(1.0, ticket_price))
 
+func get_patience_ratio() -> float:
+	return clampf(patience / maxf(1.0, patience_max), 0.0, 1.0)
+
 func _reserve_first_seat() -> BuffetSeat:
 	for seat in seats:
 		if seat.is_available() and seat.reserve(self):
@@ -285,3 +428,46 @@ func _release_seat() -> void:
 	if reserved_seat != null:
 		reserved_seat.release(self)
 		reserved_seat = null
+
+func _build_result() -> Dictionary:
+	var payback_ratio := get_payback_ratio()
+	var fullness_ratio := get_fullness_ratio()
+	var patience_ratio := get_patience_ratio()
+	var comfort_ratio := clampf(comfort_score / 100.0, 0.0, 1.0)
+	var rating_score := minf(1.0, payback_ratio) * 0.40
+	rating_score += fullness_ratio * 0.22
+	rating_score += patience_ratio * 0.18
+	rating_score += comfort_ratio * 0.20
+	if restroom_wait_seconds > 8.0:
+		rating_score -= minf(0.18, restroom_wait_seconds / 100.0)
+	var rating := clampf(1.0 + rating_score * 4.0, 1.0, 5.0)
+
+	return {
+		"profile_name": str(profile.get("name", "顾客")),
+		"fullness_ratio": fullness_ratio,
+		"perceived_value": perceived_value,
+		"payback_ratio": payback_ratio,
+		"patience_ratio": patience_ratio,
+		"comfort_score": comfort_score,
+		"restroom_wait_seconds": restroom_wait_seconds,
+		"rounds": rounds_taken,
+		"rating": rating,
+		"review": _build_review(payback_ratio, rating)
+	}
+
+func _build_review(payback_ratio: float, rating: float) -> String:
+	if not last_issue.is_empty():
+		return last_issue
+	if payback_ratio < 0.62:
+		return "没觉得吃回本"
+	if comfort_score < 58.0:
+		if current_temperature > 26.0:
+			return "店里有点热"
+		return "店里有点冷"
+	if restroom_wait_seconds > 8.0:
+		return "厕所排队太久"
+	if get_patience_ratio() < 0.45:
+		return "排队有点久"
+	if rating >= 4.4:
+		return "吃得挺值，下次还来"
+	return "整体还可以"
