@@ -1,14 +1,15 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
-[ext_resource type="Script" path="res://scripts/seat.gd" id="3_seat"]
+[ext_resource type="Script" path="res://scripts/buffet_table.gd" id="3_table"]
 [ext_resource type="Script" path="res://scripts/kitchen.gd" id="4_kitchen"]
 [ext_resource type="Script" path="res://scripts/pantry.gd" id="5_pantry"]
 [ext_resource type="PackedScene" path="res://scenes/service_worker.tscn" id="6_staff"]
+[ext_resource type="PackedScene" path="res://scenes/chef_worker.tscn" id="7_chef"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
-vertices = PackedVector2Array(45, 210, 675, 210, 675, 1160, 45, 1160)
+vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
 polygons = [PackedInt32Array(0, 1, 2, 3)]
 
 [sub_resource type="StyleBoxFlat" id="PanelStyle"]
@@ -24,7 +25,7 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [sub_resource type="LabelSettings" id="LabelSettings_main"]
-font_size = 17
+font_size = 15
 font_color = Color(0.12, 0.10, 0.08, 1)
 
 [sub_resource type="RectangleShape2D" id="ShapeCashier"]
@@ -39,8 +40,8 @@ size = Vector2(150, 135)
 [sub_resource type="RectangleShape2D" id="ShapeStation"]
 size = Vector2(190, 70)
 
-[sub_resource type="RectangleShape2D" id="ShapeSeat"]
-size = Vector2(104, 68)
+[sub_resource type="RectangleShape2D" id="ShapeTable"]
+size = Vector2(130, 76)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -49,15 +50,15 @@ script = ExtResource("1_main")
 navigation_polygon = SubResource("NavigationPolygon_main")
 
 [node name="Floor" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(45, 210, 675, 210, 675, 1160, 45, 1160)
+polygon = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
 color = Color(0.82, 0.75, 0.62, 1)
 
 [node name="CashierBlock" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(65, 255, 235, 255, 235, 340, 65, 340)
+polygon = PackedVector2Array(65, 310, 235, 310, 235, 395, 65, 395)
 color = Color(0.45, 0.31, 0.20, 1)
 
 [node name="CashierBody" type="StaticBody2D" parent="."]
-position = Vector2(150, 297)
+position = Vector2(150, 352)
 collision_layer = 1
 collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CashierBody"]
@@ -68,11 +69,11 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="KitchenBlock" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(65, 430, 270, 430, 270, 540, 65, 540)
+polygon = PackedVector2Array(65, 455, 270, 455, 270, 565, 65, 565)
 color = Color(0.46, 0.45, 0.42, 1)
 
 [node name="KitchenBody" type="StaticBody2D" parent="."]
-position = Vector2(167, 485)
+position = Vector2(167, 510)
 collision_layer = 1
 collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="KitchenBody"]
@@ -102,14 +103,13 @@ script = ExtResource("5_pantry")
 
 [node name="Kitchen" type="Node" parent="."]
 script = ExtResource("4_kitchen")
-production_seconds = 3.2
 batch_units = 4.0
 refill_threshold = 0.48
 
 [node name="FoodStations" type="Node2D" parent="."]
 
 [node name="StapleStation" type="Node2D" parent="FoodStations"]
-position = Vector2(555, 345)
+position = Vector2(555, 355)
 script = ExtResource("2_food")
 station_name = "主食台"
 food_tag = "staple"
@@ -120,11 +120,14 @@ starting_stock = 18.0
 satiation_per_unit = 24.0
 perceived_value_per_unit = 5.0
 cost_per_unit = 1.4
+queue_direction = Vector2(-1, 0)
 [node name="Body" type="Polygon2D" parent="FoodStations/StapleStation"]
 polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
 color = Color(0.71, 0.55, 0.29, 1)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/StapleStation"]
 position = Vector2(-132, 0)
+[node name="RefillPoint" type="Marker2D" parent="FoodStations/StapleStation"]
+position = Vector2(0, -120)
 [node name="StaticBody2D" type="StaticBody2D" parent="FoodStations/StapleStation"]
 collision_layer = 1
 collision_mask = 2
@@ -136,7 +139,7 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="MeatStation" type="Node2D" parent="FoodStations"]
-position = Vector2(555, 505)
+position = Vector2(555, 525)
 script = ExtResource("2_food")
 station_name = "烤肉台"
 food_tag = "meat"
@@ -147,11 +150,14 @@ starting_stock = 16.0
 satiation_per_unit = 17.0
 perceived_value_per_unit = 18.0
 cost_per_unit = 7.5
+queue_direction = Vector2(-1, 0)
 [node name="Body" type="Polygon2D" parent="FoodStations/MeatStation"]
 polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
 color = Color(0.67, 0.32, 0.22, 1)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/MeatStation"]
 position = Vector2(-132, 0)
+[node name="RefillPoint" type="Marker2D" parent="FoodStations/MeatStation"]
+position = Vector2(0, -120)
 [node name="StaticBody2D" type="StaticBody2D" parent="FoodStations/MeatStation"]
 collision_layer = 1
 collision_mask = 2
@@ -163,7 +169,7 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="SeafoodStation" type="Node2D" parent="FoodStations"]
-position = Vector2(555, 665)
+position = Vector2(555, 695)
 script = ExtResource("2_food")
 station_name = "海鲜台"
 food_tag = "seafood"
@@ -174,11 +180,14 @@ starting_stock = 14.0
 satiation_per_unit = 10.0
 perceived_value_per_unit = 16.0
 cost_per_unit = 6.2
+queue_direction = Vector2(-1, 0)
 [node name="Body" type="Polygon2D" parent="FoodStations/SeafoodStation"]
 polygon = PackedVector2Array(-95, -35, 95, -35, 95, 35, -95, 35)
 color = Color(0.25, 0.55, 0.63, 1)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
 position = Vector2(-132, 0)
+[node name="RefillPoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
+position = Vector2(0, -120)
 [node name="StaticBody2D" type="StaticBody2D" parent="FoodStations/SeafoodStation"]
 collision_layer = 1
 collision_mask = 2
@@ -189,120 +198,87 @@ radius = 102.0
 avoidance_enabled = true
 avoidance_layers = 1
 
-[node name="Seats" type="Node2D" parent="."]
+[node name="Tables" type="Node2D" parent="."]
 
-[node name="SeatA" type="Node2D" parent="Seats"]
-position = Vector2(180, 650)
-script = ExtResource("3_seat")
-[node name="Body" type="Polygon2D" parent="Seats/SeatA"]
-polygon = PackedVector2Array(-52, -34, 52, -34, 52, 34, -52, 34)
+[node name="TableA" type="Node2D" parent="Tables"]
+position = Vector2(185, 705)
+script = ExtResource("3_table")
+table_name = "A桌"
+[node name="Body" type="Polygon2D" parent="Tables/TableA"]
+polygon = PackedVector2Array(-65, -38, 65, -38, 65, 38, -65, 38)
 color = Color(0.37, 0.25, 0.16, 1)
-[node name="ServicePoint" type="Marker2D" parent="Seats/SeatA"]
-position = Vector2(0, -80)
-[node name="StaticBody2D" type="StaticBody2D" parent="Seats/SeatA"]
+[node name="SeatPoints" type="Node2D" parent="Tables/TableA"]
+[node name="Seat1" type="Marker2D" parent="Tables/TableA/SeatPoints"]
+position = Vector2(0, -92)
+[node name="Seat2" type="Marker2D" parent="Tables/TableA/SeatPoints"]
+position = Vector2(0, 92)
+[node name="CleanPoint" type="Marker2D" parent="Tables/TableA"]
+position = Vector2(-100, 0)
+[node name="StaticBody2D" type="StaticBody2D" parent="Tables/TableA"]
 collision_layer = 1
 collision_mask = 2
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Seats/SeatA/StaticBody2D"]
-shape = SubResource("ShapeSeat")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Seats/SeatA"]
-radius = 62.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Tables/TableA/StaticBody2D"]
+shape = SubResource("ShapeTable")
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Tables/TableA"]
+radius = 78.0
 avoidance_enabled = true
 avoidance_layers = 1
 
-[node name="SeatB" type="Node2D" parent="Seats"]
-position = Vector2(340, 650)
-script = ExtResource("3_seat")
-[node name="Body" type="Polygon2D" parent="Seats/SeatB"]
-polygon = PackedVector2Array(-52, -34, 52, -34, 52, 34, -52, 34)
+[node name="TableB" type="Node2D" parent="Tables"]
+position = Vector2(350, 820)
+script = ExtResource("3_table")
+table_name = "B桌"
+[node name="Body" type="Polygon2D" parent="Tables/TableB"]
+polygon = PackedVector2Array(-65, -38, 65, -38, 65, 38, -65, 38)
 color = Color(0.37, 0.25, 0.16, 1)
-[node name="ServicePoint" type="Marker2D" parent="Seats/SeatB"]
-position = Vector2(0, -80)
-[node name="StaticBody2D" type="StaticBody2D" parent="Seats/SeatB"]
+[node name="SeatPoints" type="Node2D" parent="Tables/TableB"]
+[node name="Seat1" type="Marker2D" parent="Tables/TableB/SeatPoints"]
+position = Vector2(0, -92)
+[node name="Seat2" type="Marker2D" parent="Tables/TableB/SeatPoints"]
+position = Vector2(0, 92)
+[node name="CleanPoint" type="Marker2D" parent="Tables/TableB"]
+position = Vector2(-100, 0)
+[node name="StaticBody2D" type="StaticBody2D" parent="Tables/TableB"]
 collision_layer = 1
 collision_mask = 2
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Seats/SeatB/StaticBody2D"]
-shape = SubResource("ShapeSeat")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Seats/SeatB"]
-radius = 62.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Tables/TableB/StaticBody2D"]
+shape = SubResource("ShapeTable")
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Tables/TableB"]
+radius = 78.0
 avoidance_enabled = true
 avoidance_layers = 1
 
-[node name="SeatC" type="Node2D" parent="Seats"]
-position = Vector2(180, 815)
-script = ExtResource("3_seat")
-[node name="Body" type="Polygon2D" parent="Seats/SeatC"]
-polygon = PackedVector2Array(-52, -34, 52, -34, 52, 34, -52, 34)
+[node name="TableC" type="Node2D" parent="Tables"]
+position = Vector2(185, 945)
+script = ExtResource("3_table")
+table_name = "C桌"
+[node name="Body" type="Polygon2D" parent="Tables/TableC"]
+polygon = PackedVector2Array(-65, -38, 65, -38, 65, 38, -65, 38)
 color = Color(0.37, 0.25, 0.16, 1)
-[node name="ServicePoint" type="Marker2D" parent="Seats/SeatC"]
-position = Vector2(0, -80)
-[node name="StaticBody2D" type="StaticBody2D" parent="Seats/SeatC"]
+[node name="SeatPoints" type="Node2D" parent="Tables/TableC"]
+[node name="Seat1" type="Marker2D" parent="Tables/TableC/SeatPoints"]
+position = Vector2(0, -92)
+[node name="Seat2" type="Marker2D" parent="Tables/TableC/SeatPoints"]
+position = Vector2(0, 92)
+[node name="CleanPoint" type="Marker2D" parent="Tables/TableC"]
+position = Vector2(-100, 0)
+[node name="StaticBody2D" type="StaticBody2D" parent="Tables/TableC"]
 collision_layer = 1
 collision_mask = 2
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Seats/SeatC/StaticBody2D"]
-shape = SubResource("ShapeSeat")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Seats/SeatC"]
-radius = 62.0
-avoidance_enabled = true
-avoidance_layers = 1
-
-[node name="SeatD" type="Node2D" parent="Seats"]
-position = Vector2(340, 815)
-script = ExtResource("3_seat")
-[node name="Body" type="Polygon2D" parent="Seats/SeatD"]
-polygon = PackedVector2Array(-52, -34, 52, -34, 52, 34, -52, 34)
-color = Color(0.37, 0.25, 0.16, 1)
-[node name="ServicePoint" type="Marker2D" parent="Seats/SeatD"]
-position = Vector2(0, -80)
-[node name="StaticBody2D" type="StaticBody2D" parent="Seats/SeatD"]
-collision_layer = 1
-collision_mask = 2
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Seats/SeatD/StaticBody2D"]
-shape = SubResource("ShapeSeat")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Seats/SeatD"]
-radius = 62.0
-avoidance_enabled = true
-avoidance_layers = 1
-
-[node name="SeatE" type="Node2D" parent="Seats"]
-position = Vector2(180, 980)
-script = ExtResource("3_seat")
-[node name="Body" type="Polygon2D" parent="Seats/SeatE"]
-polygon = PackedVector2Array(-52, -34, 52, -34, 52, 34, -52, 34)
-color = Color(0.37, 0.25, 0.16, 1)
-[node name="ServicePoint" type="Marker2D" parent="Seats/SeatE"]
-position = Vector2(0, -80)
-[node name="StaticBody2D" type="StaticBody2D" parent="Seats/SeatE"]
-collision_layer = 1
-collision_mask = 2
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Seats/SeatE/StaticBody2D"]
-shape = SubResource("ShapeSeat")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Seats/SeatE"]
-radius = 62.0
-avoidance_enabled = true
-avoidance_layers = 1
-
-[node name="SeatF" type="Node2D" parent="Seats"]
-position = Vector2(340, 980)
-script = ExtResource("3_seat")
-[node name="Body" type="Polygon2D" parent="Seats/SeatF"]
-polygon = PackedVector2Array(-52, -34, 52, -34, 52, 34, -52, 34)
-color = Color(0.37, 0.25, 0.16, 1)
-[node name="ServicePoint" type="Marker2D" parent="Seats/SeatF"]
-position = Vector2(0, -80)
-[node name="StaticBody2D" type="StaticBody2D" parent="Seats/SeatF"]
-collision_layer = 1
-collision_mask = 2
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Seats/SeatF/StaticBody2D"]
-shape = SubResource("ShapeSeat")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Seats/SeatF"]
-radius = 62.0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Tables/TableC/StaticBody2D"]
+shape = SubResource("ShapeTable")
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Tables/TableC"]
+radius = 78.0
 avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="Staff" type="Node2D" parent="."]
 
 [node name="ServiceWorker" parent="Staff" instance=ExtResource("6_staff")]
-position = Vector2(315, 500)
+position = Vector2(320, 600)
+
+[node name="ChefWorker" parent="Staff" instance=ExtResource("7_chef")]
+position = Vector2(315, 445)
 
 [node name="Points" type="Node2D" parent="."]
 
@@ -310,16 +286,19 @@ position = Vector2(315, 500)
 position = Vector2(330, 1125)
 
 [node name="CashierCounter" type="Marker2D" parent="Points"]
-position = Vector2(150, 405)
+position = Vector2(150, 460)
 
-[node name="SeatWait" type="Marker2D" parent="Points"]
-position = Vector2(75, 610)
+[node name="TableWait" type="Marker2D" parent="Points"]
+position = Vector2(75, 620)
 
 [node name="RestroomQueue" type="Marker2D" parent="Points"]
 position = Vector2(410, 995)
 
 [node name="RestroomUse" type="Marker2D" parent="Points"]
 position = Vector2(468, 995)
+
+[node name="ChefPrep" type="Marker2D" parent="Points"]
+position = Vector2(305, 510)
 
 [node name="Exit" type="Marker2D" parent="Points"]
 position = Vector2(630, 1125)
@@ -330,10 +309,10 @@ position = Vector2(630, 1125)
 
 [node name="UI" type="PanelContainer" parent="CanvasLayer"]
 anchor_right = 1.0
-offset_left = 20.0
-offset_top = 18.0
-offset_right = -20.0
-offset_bottom = 245.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = 272.0
 theme_override_styles/panel = SubResource("PanelStyle")
 
 [node name="VBox" type="VBoxContainer" parent="CanvasLayer/UI"]
@@ -341,7 +320,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐灰盒原型 v0.5｜场景运行基础"
+text = "自助餐灰盒原型 v0.6｜垂直切片准备"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
@@ -359,7 +338,7 @@ label_settings = SubResource("LabelSettings_main")
 
 [node name="StockLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "餐台库存"
+text = "餐台库存/排队/贡献"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
@@ -381,6 +360,12 @@ text = "厨房"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
+[node name="ChefLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+layout_mode = 2
+text = "厨师"
+horizontal_alignment = 1
+label_settings = SubResource("LabelSettings_main")
+
 [node name="StaffLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
 text = "服务员"
@@ -398,6 +383,36 @@ layout_mode = 2
 text = "准备营业"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
+
+[node name="SupplyControls" type="PanelContainer" parent="CanvasLayer"]
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -218.0
+offset_right = -16.0
+offset_bottom = -154.0
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="HBox" type="HBoxContainer" parent="CanvasLayer/SupplyControls"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Staple" type="Button" parent="CanvasLayer/SupplyControls/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "主食补菜：开"
+
+[node name="Meat" type="Button" parent="CanvasLayer/SupplyControls/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "肉类补菜：开"
+
+[node name="Seafood" type="Button" parent="CanvasLayer/SupplyControls/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "海鲜补菜：开"
 
 [node name="PriorityControls" type="PanelContainer" parent="CanvasLayer"]
 anchor_left = 0.0
