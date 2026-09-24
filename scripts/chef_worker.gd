@@ -14,7 +14,7 @@ enum State {
 @export var cook_seconds: float = 3.0
 
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
-@onready var tray: Polygon2D = $Tray
+@onready var visual: ActorVisual = $Visual
 
 var state: State = State.IDLE
 var kitchen: KitchenSystem
@@ -24,7 +24,8 @@ var cook_timer := 0.0
 var navigation_ready := false
 
 func _ready() -> void:
-	tray.visible = false
+	visual.set_carry_visible(false)
+	visual.set_action("idle")
 	call_deferred("_begin_navigation")
 
 func setup(kitchen_system: KitchenSystem, prep_point: Vector2) -> void:
@@ -37,6 +38,7 @@ func _begin_navigation() -> void:
 	navigation_ready = true
 
 func _process(delta: float) -> void:
+	z_index = int(global_position.y)
 	if not navigation_ready or kitchen == null:
 		return
 	if state == State.IDLE:
@@ -44,7 +46,8 @@ func _process(delta: float) -> void:
 	elif state == State.COOKING:
 		cook_timer -= delta
 		if cook_timer <= 0.0:
-			tray.visible = true
+			visual.set_action("idle")
+			visual.set_carry_visible(true)
 			state = State.DELIVERING
 			navigation_agent.target_position = current_station.get_refill_position()
 			emit_signal("task_changed", "厨师：端菜去" + current_station.station_name)
@@ -59,6 +62,7 @@ func _physics_process(_delta: float) -> void:
 		return
 	var next_position := navigation_agent.get_next_path_position()
 	var desired_velocity := global_position.direction_to(next_position) * speed
+	visual.set_motion(desired_velocity)
 	if navigation_agent.avoidance_enabled:
 		navigation_agent.velocity = desired_velocity
 	else:
@@ -69,6 +73,7 @@ func _on_velocity_computed(safe_velocity: Vector2) -> void:
 	if state not in [State.MOVING_TO_PREP, State.DELIVERING]:
 		return
 	velocity = safe_velocity
+	visual.set_motion(safe_velocity)
 	move_and_slide()
 
 func _try_claim_job() -> void:
@@ -76,6 +81,7 @@ func _try_claim_job() -> void:
 	if current_station == null:
 		return
 	state = State.MOVING_TO_PREP
+	visual.set_action("idle")
 	navigation_agent.target_position = prep_position
 	emit_signal("task_changed", "厨师：准备" + current_station.station_name)
 
@@ -84,10 +90,13 @@ func _arrive() -> void:
 		state = State.COOKING
 		cook_timer = cook_seconds
 		velocity = Vector2.ZERO
+		visual.set_motion(Vector2.ZERO)
+		visual.set_action("cook")
 		emit_signal("task_changed", "厨师：制作" + current_station.station_name)
 	elif state == State.DELIVERING:
 		kitchen.complete_job(current_station)
-		tray.visible = false
+		visual.set_carry_visible(false)
+		visual.set_action("idle")
 		current_station = null
 		state = State.IDLE
 		emit_signal("task_changed", "厨师：待命")
