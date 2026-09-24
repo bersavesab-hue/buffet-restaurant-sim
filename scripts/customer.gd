@@ -529,3 +529,50 @@ func _build_review(payback_ratio: float, rating: float) -> String:
 	if rating >= 4.4:
 		return "吃得挺值，下次还来"
 	return "整体还可以"
+
+
+func is_expected_stationary_for_diagnostics() -> bool:
+	return state in [
+		State.WAIT_CASHIER,
+		State.CASHIER_SERVICE,
+		State.WAIT_FOOD,
+		State.FOOD_SERVICE,
+		State.WAIT_TABLE,
+		State.EAT,
+		State.WAIT_RESTROOM,
+		State.RESTROOM_USE,
+		State.DONE
+	]
+
+func get_debug_state_label() -> String:
+	match state:
+		State.ENTER:
+			return "进店"
+		State.WAIT_CASHIER:
+			return "收银排队"
+		State.CASHIER:
+			return "前往收银"
+		State.CASHIER_SERVICE:
+			return "付款"
+		State.WAIT_FOOD:
+			return "取餐排队"
+		State.FOOD_SERVICE:
+			return "夹菜"
+		State.WAIT_TABLE:
+			return "等座"
+		State.TABLE:
+			return "回桌"
+		State.EAT:
+			return "吃饭"
+		State.WAIT_RESTROOM:
+			return "厕所排队"
+		State.RESTROOM:
+			return "前往厕所"
+		State.RESTROOM_USE:
+			return "使用厕所"
+		State.EXIT:
+			return "离店"
+		State.DONE:
+			return "完成"
+		_:
+			return "未知"
