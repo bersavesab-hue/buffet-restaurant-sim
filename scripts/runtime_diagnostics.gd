@@ -85,7 +85,7 @@ func _track_customers(delta: float) -> void:
 
 	var alive_ids: Dictionary = {}
 	for node in layer.get_children():
-		if not node is BuffetCustomer:
+		if not (node is BuffetCustomer):
 			continue
 		var customer := node as BuffetCustomer
 		var id := customer.get_instance_id()
@@ -102,7 +102,8 @@ func _track_customers(delta: float) -> void:
 
 		var watch: Dictionary = customer_watch[id]
 		var state_changed := int(watch["state"]) != int(customer.state)
-		var moved := (watch["position"] as Vector2).distance_to(customer.global_position) > 2.5
+		var previous_position: Vector2 = watch["position"]
+		var moved := previous_position.distance_to(customer.global_position) > 2.5
 
 		if state_changed or moved or customer.is_expected_stationary_for_diagnostics():
 			watch["seconds"] = 0.0
