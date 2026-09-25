@@ -32,6 +32,7 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 @onready var staff_label: Label = $CanvasLayer/UI/VBox/StaffLabel
 @onready var review_label: Label = $CanvasLayer/UI/VBox/ReviewLabel
 @onready var status_label: Label = $CanvasLayer/UI/VBox/StatusLabel
+@onready var debug_toggle_button: Button = $CanvasLayer/UI/VBox/DebugToggle
 
 @onready var ac_switch_button: Button = $CanvasLayer/Controls/HBox/ACSwitch
 @onready var temp_down_button: Button = $CanvasLayer/Controls/HBox/TempDown
@@ -79,6 +80,7 @@ var heat_load := 0.0
 var ac_enabled := true
 var ac_setpoint := 24.0
 var selected_speed := 1.0
+var debug_details_visible := false
 
 var day_settled := false
 var rng := RandomNumberGenerator.new()
@@ -129,6 +131,7 @@ func _ready() -> void:
 	kitchen.ingredient_shortage.connect(_on_kitchen_ingredient_shortage)
 	chef_worker.setup(kitchen, chef_prep_point.global_position)
 	_connect_controls()
+	_apply_hud_mode()
 	day_remaining = day_duration_seconds
 	spawn_timer = 0.4
 	status_label.text = "营业中：69元大众自助"
@@ -184,6 +187,7 @@ func _connect_controls() -> void:
 	supply_staple_button.pressed.connect(func(): _toggle_station_refill("staple"))
 	supply_meat_button.pressed.connect(func(): _toggle_station_refill("meat"))
 	supply_seafood_button.pressed.connect(func(): _toggle_station_refill("seafood"))
+	debug_toggle_button.pressed.connect(_toggle_debug_details)
 
 func _update_day(delta: float) -> void:
 	if day_remaining > 0.0:
@@ -530,3 +534,29 @@ func _update_debug_ui() -> void:
 	chef_label.text = chef_worker.get_status()
 	staff_label.text = service_worker.get_status()
 	review_label.text = "最新评价：" + last_review
+
+
+func _toggle_debug_details() -> void:
+	debug_details_visible = not debug_details_visible
+	_apply_hud_mode()
+
+func _apply_hud_mode() -> void:
+	var detail_paths := [
+		"CanvasLayer/UI/VBox/StockLabel",
+		"CanvasLayer/UI/VBox/PantryLabel",
+		"CanvasLayer/UI/VBox/EnvironmentLabel",
+		"CanvasLayer/UI/VBox/KitchenLabel",
+		"CanvasLayer/UI/VBox/ChefLabel",
+		"CanvasLayer/UI/VBox/StaffLabel",
+		"CanvasLayer/UI/VBox/DeviceLabel",
+		"CanvasLayer/UI/VBox/DiagnosticsLabel"
+	]
+	for path in detail_paths:
+		var node := get_node_or_null(path) as CanvasItem
+		if node != null:
+			node.visible = debug_details_visible
+	debug_toggle_button.text = "收起详情" if debug_details_visible else "展开详情"
+
+	var mobile_layout := get_node_or_null("CanvasLayer/MobileLayout")
+	if mobile_layout != null and mobile_layout.has_method("refresh_layout"):
+		mobile_layout.call_deferred("refresh_layout")
