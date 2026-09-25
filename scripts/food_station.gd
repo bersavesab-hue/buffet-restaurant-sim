@@ -22,9 +22,15 @@ var customer_queue: Array[Node] = []
 var total_units_taken := 0.0
 var total_cost_served := 0.0
 var total_perceived_value_served := 0.0
+var dish_visuals: Array[CanvasItem] = []
 
 func _ready() -> void:
 	stock = clampf(starting_stock, 0.0, capacity)
+	for node_name in ["DishA", "DishB"]:
+		var item := get_node_or_null(node_name) as CanvasItem
+		if item != null:
+			dish_visuals.append(item)
+	_update_dish_visuals()
 
 func has_food(min_units: float = 0.25) -> bool:
 	return stock >= min_units
@@ -96,6 +102,7 @@ func take_portion(requested_units: float) -> Dictionary:
 
 	var actual_units := minf(stock, maxf(0.25, requested_units))
 	stock = maxf(0.0, stock - actual_units)
+	_update_dish_visuals()
 	var actual_cost := cost_per_unit * actual_units
 	var actual_value := perceived_value_per_unit * actual_units
 	total_units_taken += actual_units
@@ -114,7 +121,16 @@ func take_portion(requested_units: float) -> Dictionary:
 func refill(units: float) -> float:
 	var before := stock
 	stock = clampf(stock + units, 0.0, capacity)
+	_update_dish_visuals()
 	return stock - before
+
+func _update_dish_visuals() -> void:
+	var ratio := get_stock_ratio()
+	for item in dish_visuals:
+		item.visible = ratio > 0.015
+		var tint := item.modulate
+		tint.a = clampf(0.18 + ratio * 0.82, 0.0, 1.0)
+		item.modulate = tint
 
 func get_stock_ratio() -> float:
 	return clampf(stock / maxf(0.01, capacity), 0.0, 1.0)
