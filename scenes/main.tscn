@@ -91,6 +91,36 @@ texture = ExtResource("9_wall")
 z_as_relative = false
 z_index = -900
 
+[node name="ZoneStaff" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(55, 300, 330, 300, 330, 590, 55, 590)
+color = Color(0.48, 0.52, 0.50, 0.10)
+z_as_relative = false
+z_index = -950
+
+[node name="ZoneBuffet" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(410, 300, 675, 300, 675, 790, 410, 790)
+color = Color(0.88, 0.70, 0.42, 0.11)
+z_as_relative = false
+z_index = -950
+
+[node name="ZoneDining" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(70, 610, 445, 610, 445, 1110, 70, 1110)
+color = Color(0.86, 0.78, 0.65, 0.16)
+z_as_relative = false
+z_index = -950
+
+[node name="ZoneRestroom" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(475, 850, 675, 850, 675, 1110, 475, 1110)
+color = Color(0.50, 0.70, 0.72, 0.10)
+z_as_relative = false
+z_index = -950
+
+[node name="MainAisle" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(330, 300, 410, 300, 410, 1135, 330, 1135)
+color = Color(0.96, 0.91, 0.81, 0.22)
+z_as_relative = false
+z_index = -945
+
 [node name="CashierVisual" type="Sprite2D" parent="."]
 position = Vector2(150, 333)
 texture = ExtResource("10_cashier")
@@ -289,7 +319,7 @@ avoidance_layers = 1
 [node name="TableA" type="Node2D" parent="Tables"]
 z_as_relative = false
 z_index = 705
-position = Vector2(185, 705)
+position = Vector2(175, 705)
 script = ExtResource("3_table")
 table_name = "A桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableA"]
@@ -316,7 +346,7 @@ avoidance_layers = 1
 [node name="TableB" type="Node2D" parent="Tables"]
 z_as_relative = false
 z_index = 820
-position = Vector2(350, 820)
+position = Vector2(335, 820)
 script = ExtResource("3_table")
 table_name = "B桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableB"]
@@ -343,7 +373,7 @@ avoidance_layers = 1
 [node name="TableC" type="Node2D" parent="Tables"]
 z_as_relative = false
 z_index = 945
-position = Vector2(185, 945)
+position = Vector2(175, 945)
 script = ExtResource("3_table")
 table_name = "C桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableC"]
@@ -418,7 +448,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.11｜第一波内容扩充"
+text = "自助餐 v0.12｜餐厅场景成型"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
@@ -435,36 +465,42 @@ horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="StockLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "餐台库存/排队/贡献"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="PantryLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "原料库存"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="EnvironmentLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "温度"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="KitchenLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "厨房"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="ChefLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "厨师"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="StaffLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "服务员"
 horizontal_alignment = 1
@@ -477,12 +513,14 @@ horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="DeviceLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "设备：检测中"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
 [node name="DiagnosticsLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+visible = false
 layout_mode = 2
 text = "诊断：启动中"
 horizontal_alignment = 1
@@ -493,6 +531,12 @@ layout_mode = 2
 text = "准备营业"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
+
+[node name="DebugToggle" type="Button" parent="CanvasLayer/UI/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+text = "展开详情"
+focus_mode = 0
 
 [node name="SupplyControls" type="PanelContainer" parent="CanvasLayer"]
 anchor_left = 0.0
