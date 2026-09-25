@@ -41,6 +41,7 @@ func _run_startup_self_check() -> void:
 		"Staff/ServiceWorker",
 		"Staff/ChefWorker",
 		"Points/Entrance",
+		"Points/CashierQueueStart",
 		"Points/Exit"
 	]
 	for path in required_nodes:
