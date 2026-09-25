@@ -36,13 +36,13 @@ func _process(delta: float) -> void:
 	time += delta
 	sprite.position = base_sprite_position
 	sprite.rotation = 0.0
-	sprite.scale = Vector2(0.65, 0.65)
+	sprite.scale = Vector2(0.78, 0.78)
 
 	match current_action:
 		"take_food":
 			sprite.rotation = sin(time * 12.0) * 0.045
 		"eat":
-			sprite.scale = Vector2(0.68, 0.54)
+			sprite.scale = Vector2(0.80, 0.64)
 			sprite.position.y += 9.0 + sin(time * 7.0) * 1.0
 		"collect":
 			sprite.rotation = sin(time * 9.0) * 0.05
