@@ -37,10 +37,7 @@ func _apply_layout() -> void:
 	if world_camera != null:
 		# Keep the authored 720×1280 restaurant aligned to the top on tall phones.
 		# Extra height is revealed below the core scene instead of above it.
-		world_camera.position = Vector2(
-			DESIGN_SIZE.x * 0.5,
-			maxf(DESIGN_SIZE.y * 0.5, viewport_size.y * 0.5)
-		)
+		world_camera.position = calculate_camera_position(viewport_size)
 
 	top_panel.offset_left = left
 	top_panel.offset_right = -right
@@ -117,6 +114,12 @@ func _get_safe_margins(viewport_size: Vector2) -> Vector4:
 		minf(top, 120.0),
 		minf(right, 96.0),
 		minf(bottom, 120.0)
+	)
+
+static func calculate_camera_position(viewport_size: Vector2) -> Vector2:
+	return Vector2(
+		DESIGN_SIZE.x * 0.5,
+		maxf(DESIGN_SIZE.y * 0.5, viewport_size.y * 0.5)
 	)
 
 static func calculate_layout_metrics(viewport_size: Vector2, margins: Vector4) -> Dictionary:
