@@ -76,7 +76,7 @@ func _get_safe_margins(viewport_size: Vector2) -> Vector4:
 		return Vector4.ZERO
 
 	var physical_window := DisplayServer.window_get_size()
-	var safe_area := DisplayServer.get_display_safe_area(DisplayServer.SCREEN_OF_MAIN_WINDOW)
+	var safe_area := DisplayServer.get_display_safe_area()
 	if physical_window.x <= 0 or physical_window.y <= 0:
 		return Vector4.ZERO
 	if safe_area.size.x <= 0 or safe_area.size.y <= 0:
