@@ -40,24 +40,44 @@ jobs:
           set -euo pipefail
           "$GODOT_BIN" --headless --path . --import
 
-      - name: Run main scene smoke test
+      - name: Validate phone aspect profiles
         shell: bash
         run: |
-          set -o pipefail
-          "$GODOT_BIN" --headless --path . --quit-after 360 --log-file validation.log 2>&1 | tee runtime-console.log
-          status=${PIPESTATUS[0]}
-          cat validation.log || true
-          if [ "$status" -ne 0 ]; then
-            exit "$status"
-          fi
-          if grep -E -i "SCRIPT ERROR|Parse Error|ERROR:.*(failed|invalid|cannot|not found)|启动自检失败" validation.log runtime-console.log; then
-            echo "Godot validation found runtime or parse errors."
-            exit 1
-          fi
-          if ! grep -q "\[SELFTEST PASS\]" validation.log runtime-console.log; then
-            echo "Runtime self-test did not complete."
-            exit 1
-          fi
+          set -euo pipefail
+          profiles=("720x1280" "1080x1920" "1080x2340" "1080x2400" "1440x3200")
+          : > runtime-console.log
+
+          for resolution in "${profiles[@]}"; do
+            log_file="validation-${resolution}.log"
+            echo "===== ${resolution} =====" | tee -a runtime-console.log
+
+            set +e
+            "$GODOT_BIN"               --headless               --path .               --resolution "${resolution}"               --quit-after 180               --log-file "${log_file}"               2>&1 | tee -a runtime-console.log
+            status=${PIPESTATUS[0]}
+            set -e
+
+            cat "${log_file}" >> runtime-console.log || true
+
+            if [ "$status" -ne 0 ]; then
+              echo "Godot exited with status $status at ${resolution}."
+              exit "$status"
+            fi
+
+            if grep -E -i "SCRIPT ERROR|Parse Error|ERROR:.*(failed|invalid|cannot|not found)|启动自检失败" "${log_file}"; then
+              echo "Godot validation found an error at ${resolution}."
+              exit 1
+            fi
+
+            if ! grep -q "\[SELFTEST PASS\]" "${log_file}"; then
+              echo "Runtime self-test did not complete at ${resolution}."
+              exit 1
+            fi
+
+            if ! grep -q "\[MOBILE_LAYOUT\]" "${log_file}"; then
+              echo "Mobile layout did not initialize at ${resolution}."
+              exit 1
+            fi
+          done
 
       - name: Upload validation logs
         if: always()
@@ -65,6 +85,6 @@ jobs:
         with:
           name: godot-validation-logs
           path: |
-            validation.log
+            validation-*.log
             runtime-console.log
           if-no-files-found: ignore
