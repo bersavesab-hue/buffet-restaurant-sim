@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3]
+[gd_scene load_steps=38 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -24,6 +24,11 @@
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/table_double.svg" id="14_table"]
 [ext_resource type="Script" path="res://scripts/runtime_diagnostics.gd" id="15_diag"]
 [ext_resource type="Script" path="res://scripts/mobile_layout.gd" id="16_mobile"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/plant.svg" id="25_plant"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/trash_bin.svg" id="26_bin"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/divider.svg" id="27_divider"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/entrance_mat.svg" id="28_mat"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/wall_board.svg" id="29_board"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -90,6 +95,48 @@ position = Vector2(360, 275)
 texture = ExtResource("9_wall")
 z_as_relative = false
 z_index = -900
+
+[node name="WallBoard" type="Sprite2D" parent="."]
+position = Vector2(385, 314)
+texture = ExtResource("29_board")
+scale = Vector2(0.72, 0.72)
+z_as_relative = false
+z_index = -820
+
+[node name="EntranceMat" type="Sprite2D" parent="."]
+position = Vector2(330, 1112)
+texture = ExtResource("28_mat")
+scale = Vector2(0.92, 0.92)
+z_as_relative = false
+z_index = -930
+
+[node name="DiningDivider" type="Sprite2D" parent="."]
+position = Vector2(132, 598)
+texture = ExtResource("27_divider")
+scale = Vector2(0.70, 0.70)
+z_as_relative = false
+z_index = 600
+
+[node name="PlantDining" type="Sprite2D" parent="."]
+position = Vector2(70, 650)
+texture = ExtResource("25_plant")
+scale = Vector2(0.72, 0.72)
+z_as_relative = false
+z_index = 650
+
+[node name="PlantRestroom" type="Sprite2D" parent="."]
+position = Vector2(652, 842)
+texture = ExtResource("25_plant")
+scale = Vector2(0.68, 0.68)
+z_as_relative = false
+z_index = 842
+
+[node name="TrashBin" type="Sprite2D" parent="."]
+position = Vector2(486, 1062)
+texture = ExtResource("26_bin")
+scale = Vector2(0.78, 0.78)
+z_as_relative = false
+z_index = 1062
 
 [node name="ZoneStaff" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(55, 300, 330, 300, 330, 590, 55, 590)
@@ -187,8 +234,8 @@ refill_threshold = 0.48
 
 [node name="StapleStation" type="Node2D" parent="FoodStations"]
 z_as_relative = false
-z_index = 355
-position = Vector2(555, 355)
+z_index = 390
+position = Vector2(548, 390)
 script = ExtResource("2_food")
 station_name = "主食台"
 food_tag = "staple"
@@ -230,8 +277,8 @@ avoidance_layers = 1
 
 [node name="MeatStation" type="Node2D" parent="FoodStations"]
 z_as_relative = false
-z_index = 525
-position = Vector2(555, 525)
+z_index = 555
+position = Vector2(548, 555)
 script = ExtResource("2_food")
 station_name = "烤肉台"
 food_tag = "meat"
@@ -273,8 +320,8 @@ avoidance_layers = 1
 
 [node name="SeafoodStation" type="Node2D" parent="FoodStations"]
 z_as_relative = false
-z_index = 695
-position = Vector2(555, 695)
+z_index = 720
+position = Vector2(548, 720)
 script = ExtResource("2_food")
 station_name = "海鲜台"
 food_tag = "seafood"
@@ -318,8 +365,8 @@ avoidance_layers = 1
 
 [node name="TableA" type="Node2D" parent="Tables"]
 z_as_relative = false
-z_index = 705
-position = Vector2(175, 705)
+z_index = 720
+position = Vector2(165, 720)
 script = ExtResource("3_table")
 table_name = "A桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableA"]
@@ -346,7 +393,7 @@ avoidance_layers = 1
 [node name="TableB" type="Node2D" parent="Tables"]
 z_as_relative = false
 z_index = 820
-position = Vector2(335, 820)
+position = Vector2(325, 820)
 script = ExtResource("3_table")
 table_name = "B桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableB"]
@@ -372,8 +419,8 @@ avoidance_layers = 1
 
 [node name="TableC" type="Node2D" parent="Tables"]
 z_as_relative = false
-z_index = 945
-position = Vector2(175, 945)
+z_index = 955
+position = Vector2(165, 955)
 script = ExtResource("3_table")
 table_name = "C桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableC"]
@@ -400,10 +447,10 @@ avoidance_layers = 1
 [node name="Staff" type="Node2D" parent="."]
 
 [node name="ServiceWorker" parent="Staff" instance=ExtResource("6_staff")]
-position = Vector2(320, 600)
+position = Vector2(300, 600)
 
 [node name="ChefWorker" parent="Staff" instance=ExtResource("7_chef")]
-position = Vector2(315, 445)
+position = Vector2(300, 445)
 
 [node name="Points" type="Node2D" parent="."]
 
