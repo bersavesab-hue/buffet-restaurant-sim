@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=33 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -12,7 +12,15 @@
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/cashier.svg" id="10_cashier"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/kitchen_counter.svg" id="11_kitchen"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/restroom_door.svg" id="12_restroom"]
-[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/buffet_station.svg" id="13_station"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/station_staple.svg" id="13_station"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/station_meat.svg" id="17_station_meat"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/station_seafood.svg" id="18_station_seafood"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/dish_fried_rice.svg" id="19_rice"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/dish_noodles.svg" id="20_noodles"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/dish_roast_beef.svg" id="21_beef"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/dish_roast_chicken.svg" id="22_chicken"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/dish_shrimp.svg" id="23_shrimp"]
+[ext_resource type="Texture2D" path="res://assets/vertical_slice/food/dish_crab.svg" id="24_crab"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/table_double.svg" id="14_table"]
 [ext_resource type="Script" path="res://scripts/runtime_diagnostics.gd" id="15_diag"]
 [ext_resource type="Script" path="res://scripts/mobile_layout.gd" id="16_mobile"]
@@ -166,6 +174,16 @@ queue_direction = Vector2(-1, 0)
 position = Vector2(0, -18)
 texture = ExtResource("13_station")
 scale = Vector2(0.82, 0.82)
+
+[node name="DishA" type="Sprite2D" parent="FoodStations/StapleStation"]
+position = Vector2(-26, -31)
+texture = ExtResource("19_rice")
+scale = Vector2(0.72, 0.72)
+
+[node name="DishB" type="Sprite2D" parent="FoodStations/StapleStation"]
+position = Vector2(28, -35)
+texture = ExtResource("20_noodles")
+scale = Vector2(0.70, 0.70)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/StapleStation"]
 position = Vector2(-128, 58)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/StapleStation"]
@@ -197,8 +215,18 @@ cost_per_unit = 7.5
 queue_direction = Vector2(-1, 0)
 [node name="Body" type="Sprite2D" parent="FoodStations/MeatStation"]
 position = Vector2(0, -18)
-texture = ExtResource("13_station")
+texture = ExtResource("17_station_meat")
 scale = Vector2(0.82, 0.82)
+
+[node name="DishA" type="Sprite2D" parent="FoodStations/MeatStation"]
+position = Vector2(-26, -31)
+texture = ExtResource("21_beef")
+scale = Vector2(0.72, 0.72)
+
+[node name="DishB" type="Sprite2D" parent="FoodStations/MeatStation"]
+position = Vector2(28, -35)
+texture = ExtResource("22_chicken")
+scale = Vector2(0.70, 0.70)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/MeatStation"]
 position = Vector2(-128, 58)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/MeatStation"]
@@ -230,8 +258,18 @@ cost_per_unit = 6.2
 queue_direction = Vector2(-1, 0)
 [node name="Body" type="Sprite2D" parent="FoodStations/SeafoodStation"]
 position = Vector2(0, -18)
-texture = ExtResource("13_station")
+texture = ExtResource("18_station_seafood")
 scale = Vector2(0.82, 0.82)
+
+[node name="DishA" type="Sprite2D" parent="FoodStations/SeafoodStation"]
+position = Vector2(-26, -31)
+texture = ExtResource("23_shrimp")
+scale = Vector2(0.72, 0.72)
+
+[node name="DishB" type="Sprite2D" parent="FoodStations/SeafoodStation"]
+position = Vector2(28, -35)
+texture = ExtResource("24_crab")
+scale = Vector2(0.70, 0.70)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
 position = Vector2(-128, 58)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
@@ -380,7 +418,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.10｜手机画面校正"
+text = "自助餐 v0.11｜第一波内容扩充"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
