@@ -15,6 +15,7 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 @onready var chef_worker: ChefWorker = $Staff/ChefWorker
 
 @onready var cashier_counter: Marker2D = $Points/CashierCounter
+@onready var cashier_queue_start: Marker2D = $Points/CashierQueueStart
 @onready var table_wait_point: Marker2D = $Points/TableWait
 @onready var restroom_queue_point: Marker2D = $Points/RestroomQueue
 @onready var restroom_use_point: Marker2D = $Points/RestroomUse
@@ -270,11 +271,13 @@ func _update_cashier_queue() -> void:
 		_refresh_cashier_queue_targets()
 
 func _refresh_cashier_queue_targets() -> void:
-	var start := cashier_counter.global_position + Vector2(0.0, 78.0)
+	var start := cashier_queue_start.global_position
 	for i in range(cashier_queue.size()):
 		var customer := cashier_queue[i]
 		if is_instance_valid(customer) and customer.is_waiting_for_cashier():
-			customer.set_cashier_queue_target(start + Vector2(0.0, 54.0 * float(i)))
+			# Queue runs horizontally from the counter toward the entrance,
+			# keeping it out of the dining and buffet traffic.
+			customer.set_cashier_queue_target(start + Vector2(52.0 * float(i), 0.0))
 
 func _on_food_station_requested(customer: BuffetCustomer, station: FoodStation) -> void:
 	station.enqueue_customer(customer)
