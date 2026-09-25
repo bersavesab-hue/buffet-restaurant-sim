@@ -105,9 +105,14 @@ func setup(
 	restroom_threshold = float(profile.get("restroom_threshold", 55.0))
 	var tint: Color = profile.get("color", Color(0.25, 0.49, 0.78, 1.0))
 	type_badge.color = tint
+	rng.randomize()
+	var appearance_index := int(profile.get(
+		"appearance_index",
+		rng.randi_range(0, CustomerAppearanceLibrary.get_count() - 1)
+	))
+	CustomerAppearanceLibrary.apply_to(visual, appearance_index)
 	visual.set_carry_visible(false)
 	visual.set_action("idle")
-	rng.randomize()
 	call_deferred("_begin_navigation")
 
 func _begin_navigation() -> void:
