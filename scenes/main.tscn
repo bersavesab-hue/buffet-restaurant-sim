@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/buffet_station.svg" id="13_station"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/table_double.svg" id="14_table"]
 [ext_resource type="Script" path="res://scripts/runtime_diagnostics.gd" id="15_diag"]
+[ext_resource type="Script" path="res://scripts/mobile_layout.gd" id="16_mobile"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -33,7 +34,7 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [sub_resource type="LabelSettings" id="LabelSettings_main"]
-font_size = 15
+font_size = 13
 font_color = Color(0.12, 0.10, 0.08, 1)
 
 [sub_resource type="RectangleShape2D" id="ShapeCashier"]
@@ -56,6 +57,16 @@ script = ExtResource("1_main")
 
 [node name="RuntimeDiagnostics" type="Node" parent="."]
 script = ExtResource("15_diag")
+
+[node name="WorldCamera" type="Camera2D" parent="."]
+position = Vector2(360, 640)
+enabled = true
+
+[node name="WorldBackdrop" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-360, -640, 1080, -640, 1080, 1920, -360, 1920)
+color = Color(0.76, 0.70, 0.61, 1)
+z_as_relative = false
+z_index = -2000
 
 [node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
 navigation_polygon = SubResource("NavigationPolygon_main")
@@ -353,6 +364,9 @@ position = Vector2(630, 1125)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
+[node name="MobileLayout" type="Node" parent="CanvasLayer"]
+script = ExtResource("16_mobile")
+
 [node name="UI" type="PanelContainer" parent="CanvasLayer"]
 anchor_right = 1.0
 offset_left = 16.0
@@ -366,7 +380,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.8｜验证与稳定性"
+text = "自助餐 v0.9｜手机适配与比例校正"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
@@ -421,6 +435,12 @@ label_settings = SubResource("LabelSettings_main")
 [node name="ReviewLabel" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
 text = "最新评价"
+horizontal_alignment = 1
+label_settings = SubResource("LabelSettings_main")
+
+[node name="DeviceLabel" type="Label" parent="CanvasLayer/UI/VBox"]
+layout_mode = 2
+text = "设备：检测中"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
