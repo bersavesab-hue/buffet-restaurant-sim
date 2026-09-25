@@ -36,7 +36,7 @@ func _apply_layout() -> void:
 	top_panel.offset_left = left
 	top_panel.offset_right = -right
 	top_panel.offset_top = top
-	var top_height := clampf(top_panel.get_combined_minimum_size().y + 10.0, 220.0, 258.0)
+	var top_height := clampf(top_panel.get_combined_minimum_size().y + 10.0, 118.0, 340.0)
 	top_panel.offset_bottom = top + top_height
 
 	var row_height := 56.0
@@ -144,3 +144,7 @@ func _configure_touch_targets() -> void:
 			button.custom_minimum_size.y = 52.0
 			button.add_theme_font_size_override("font_size", 14)
 			button.focus_mode = Control.FOCUS_NONE
+
+
+func refresh_layout() -> void:
+	call_deferred("_apply_layout")
