@@ -10,7 +10,7 @@ extends Node2D
 @export var satiation_per_unit: float = 18.0
 @export var perceived_value_per_unit: float = 8.0
 @export var cost_per_unit: float = 3.0
-@export var queue_spacing: float = 46.0
+@export var queue_spacing: float = 54.0
 @export var queue_direction: Vector2 = Vector2(0, 1)
 
 @onready var service_point: Marker2D = get_node_or_null("ServicePoint") as Marker2D
