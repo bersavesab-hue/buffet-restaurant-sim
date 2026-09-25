@@ -10,6 +10,7 @@ const SIDE_PADDING := 16.0
 @onready var priority_panel: Control = canvas_layer.get_node("PriorityControls") as Control
 @onready var controls_panel: Control = canvas_layer.get_node("Controls") as Control
 @onready var device_label: Label = canvas_layer.get_node_or_null("UI/VBox/DeviceLabel") as Label
+@onready var world_camera: Camera2D = canvas_layer.get_parent().get_node_or_null("WorldCamera") as Camera2D
 
 var safe_margins := Vector4.ZERO
 var layout_profile := "16:9"
@@ -32,6 +33,14 @@ func _apply_layout() -> void:
 	var right := float(metrics["right"])
 	var top := float(metrics["top"])
 	var bottom := float(metrics["bottom"])
+
+	if world_camera != null:
+		# Keep the authored 720×1280 restaurant aligned to the top on tall phones.
+		# Extra height is revealed below the core scene instead of above it.
+		world_camera.position = Vector2(
+			DESIGN_SIZE.x * 0.5,
+			maxf(DESIGN_SIZE.y * 0.5, viewport_size.y * 0.5)
+		)
 
 	top_panel.offset_left = left
 	top_panel.offset_right = -right
