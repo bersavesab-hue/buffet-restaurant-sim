@@ -27,28 +27,46 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Configure runner Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          ANDROID_SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          test -d "$ANDROID_SDK"
+          echo "ANDROID_HOME=$ANDROID_SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK" >> "$GITHUB_ENV"
+
+          SDKMANAGER="$(find "$ANDROID_SDK/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)"
+          test -x "$SDKMANAGER"
+          echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --version
 
       - name: Install Android SDK packages
         shell: bash
         run: |
           set -euo pipefail
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager             "platform-tools"             "build-tools;35.0.1"             "platforms;android-35"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" \
+            "platform-tools" \
+            "build-tools;35.0.1" \
+            "platforms;android-35"
 
       - name: Install Godot 4.7.2 and export templates
         shell: bash
         run: |
           set -euo pipefail
 
-          curl -L --fail --retry 3             -o /tmp/godot.zip             "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
+          curl -L --fail --retry 3 \
+            -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d /tmp/godot
           GODOT_BIN="$(find /tmp/godot -maxdepth 1 -type f -name 'Godot*' | head -n 1)"
           chmod +x "$GODOT_BIN"
           echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
 
-          curl -L --fail --retry 3             -o /tmp/templates.tpz             "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz"
+          curl -L --fail --retry 3 \
+            -o /tmp/templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz"
           rm -rf /tmp/godot-templates
           mkdir -p /tmp/godot-templates
           unzip -q /tmp/templates.tpz -d /tmp/godot-templates
@@ -66,7 +84,17 @@ jobs:
           set -euo pipefail
 
           mkdir -p "$HOME/.android"
-          keytool             -keyalg RSA             -genkeypair             -alias androiddebugkey             -keypass android             -keystore "$HOME/.android/debug.keystore"             -storepass android             -dname "CN=Android Debug,O=Android,C=US"             -validity 9999             -deststoretype pkcs12
+          rm -f "$HOME/.android/debug.keystore"
+          keytool \
+            -keyalg RSA \
+            -genkeypair \
+            -alias androiddebugkey \
+            -keypass android \
+            -keystore "$HOME/.android/debug.keystore" \
+            -storepass android \
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -validity 9999 \
+            -deststoretype pkcs12
 
           mkdir -p "$HOME/.config/godot"
           cat > "$HOME/.config/godot/editor_settings-4.7.tres" <<EOF
@@ -95,7 +123,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          "$GODOT_BIN"             --headless             --path .             --export-debug "Android"             "build/buffet-restaurant-v0.11-debug.apk"
+          "$GODOT_BIN" \
+            --headless \
+            --path . \
+            --export-debug "Android" \
+            "build/buffet-restaurant-v0.11-debug.apk"
 
           test -s build/buffet-restaurant-v0.11-debug.apk
           ls -lh build/buffet-restaurant-v0.11-debug.apk
