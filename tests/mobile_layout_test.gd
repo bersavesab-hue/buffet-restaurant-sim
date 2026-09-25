@@ -13,6 +13,7 @@ func _init() -> void:
 	_check_profile("wide", Vector2(900, 1280), "宽屏")
 	_check_safe_area_offsets()
 	_check_wide_screen_centering()
+	_check_camera_alignment()
 
 	if failures.is_empty():
 		print("[MOBILE_TEST PASS] 7 layout checks passed")
@@ -58,3 +59,10 @@ func _check_wide_screen_centering() -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
+
+
+func _check_camera_alignment() -> void:
+	var base := MobileLayoutClass.calculate_camera_position(Vector2(720, 1280))
+	var tall := MobileLayoutClass.calculate_camera_position(Vector2(720, 1600))
+	_expect(base == Vector2(360, 640), "base camera position mismatch")
+	_expect(tall == Vector2(360, 800), "tall-screen camera should top-align 1280 core scene")
