@@ -71,3 +71,38 @@ func _play_idle() -> void:
 		sprite.play(animation_name)
 		sprite.pause()
 		sprite.frame = 0
+
+
+func set_directional_textures(
+	front_1: Texture2D,
+	front_2: Texture2D,
+	back_1: Texture2D,
+	back_2: Texture2D
+) -> void:
+	var frames := SpriteFrames.new()
+	frames.remove_animation(&"default")
+
+	frames.add_animation(&"idle_front")
+	frames.set_animation_loop(&"idle_front", true)
+	frames.set_animation_speed(&"idle_front", 1.0)
+	frames.add_frame(&"idle_front", front_1)
+
+	frames.add_animation(&"idle_back")
+	frames.set_animation_loop(&"idle_back", true)
+	frames.set_animation_speed(&"idle_back", 1.0)
+	frames.add_frame(&"idle_back", back_1)
+
+	frames.add_animation(&"walk_front")
+	frames.set_animation_loop(&"walk_front", true)
+	frames.set_animation_speed(&"walk_front", 7.0)
+	frames.add_frame(&"walk_front", front_1)
+	frames.add_frame(&"walk_front", front_2)
+
+	frames.add_animation(&"walk_back")
+	frames.set_animation_loop(&"walk_back", true)
+	frames.set_animation_speed(&"walk_back", 7.0)
+	frames.add_frame(&"walk_back", back_1)
+	frames.add_frame(&"walk_back", back_2)
+
+	sprite.sprite_frames = frames
+	_play_idle()
