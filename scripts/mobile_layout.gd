@@ -26,11 +26,11 @@ func _apply_layout() -> void:
 	safe_margins = _get_safe_margins(viewport_size)
 	layout_profile = _profile_for(viewport_size)
 
-	var extra_width := maxf(0.0, (viewport_size.x - DESIGN_SIZE.x) * 0.5)
-	var left := extra_width + SIDE_PADDING + safe_margins.x
-	var right := extra_width + SIDE_PADDING + safe_margins.z
-	var top := 12.0 + safe_margins.y
-	var bottom := 14.0 + safe_margins.w
+	var metrics := calculate_layout_metrics(viewport_size, safe_margins)
+	var left := float(metrics["left"])
+	var right := float(metrics["right"])
+	var top := float(metrics["top"])
+	var bottom := float(metrics["bottom"])
 
 	top_panel.offset_left = left
 	top_panel.offset_right = -right
@@ -105,7 +105,18 @@ func _get_safe_margins(viewport_size: Vector2) -> Vector4:
 		minf(bottom, 120.0)
 	)
 
-func _profile_for(viewport_size: Vector2) -> String:
+static func calculate_layout_metrics(viewport_size: Vector2, margins: Vector4) -> Dictionary:
+	var extra_width := maxf(0.0, (viewport_size.x - DESIGN_SIZE.x) * 0.5)
+	var profile := profile_for_size(viewport_size)
+	return {
+		"left": extra_width + SIDE_PADDING + margins.x,
+		"right": extra_width + SIDE_PADDING + margins.z,
+		"top": 12.0 + margins.y,
+		"bottom": 14.0 + margins.w,
+		"profile": profile
+	}
+
+static func profile_for_size(viewport_size: Vector2) -> String:
 	var ratio := viewport_size.y / maxf(1.0, viewport_size.x)
 	if ratio >= 2.12:
 		return "超长屏"
@@ -114,3 +125,6 @@ func _profile_for(viewport_size: Vector2) -> String:
 	if ratio >= 1.72:
 		return "16:9"
 	return "宽屏"
+
+func _profile_for(viewport_size: Vector2) -> String:
+	return profile_for_size(viewport_size)
