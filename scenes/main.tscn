@@ -167,9 +167,9 @@ position = Vector2(0, -18)
 texture = ExtResource("13_station")
 scale = Vector2(0.82, 0.82)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/StapleStation"]
-position = Vector2(-132, 0)
+position = Vector2(-128, 58)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/StapleStation"]
-position = Vector2(0, -120)
+position = Vector2(0, -100)
 [node name="StaticBody2D" type="StaticBody2D" parent="FoodStations/StapleStation"]
 collision_layer = 1
 collision_mask = 2
@@ -200,9 +200,9 @@ position = Vector2(0, -18)
 texture = ExtResource("13_station")
 scale = Vector2(0.82, 0.82)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/MeatStation"]
-position = Vector2(-132, 0)
+position = Vector2(-128, 58)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/MeatStation"]
-position = Vector2(0, -120)
+position = Vector2(0, -100)
 [node name="StaticBody2D" type="StaticBody2D" parent="FoodStations/MeatStation"]
 collision_layer = 1
 collision_mask = 2
@@ -233,9 +233,9 @@ position = Vector2(0, -18)
 texture = ExtResource("13_station")
 scale = Vector2(0.82, 0.82)
 [node name="ServicePoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
-position = Vector2(-132, 0)
+position = Vector2(-128, 58)
 [node name="RefillPoint" type="Marker2D" parent="FoodStations/SeafoodStation"]
-position = Vector2(0, -120)
+position = Vector2(0, -100)
 [node name="StaticBody2D" type="StaticBody2D" parent="FoodStations/SeafoodStation"]
 collision_layer = 1
 collision_mask = 2
@@ -372,7 +372,7 @@ anchor_right = 1.0
 offset_left = 16.0
 offset_top = 12.0
 offset_right = -16.0
-offset_bottom = 272.0
+offset_bottom = 258.0
 theme_override_styles/panel = SubResource("PanelStyle")
 
 [node name="VBox" type="VBoxContainer" parent="CanvasLayer/UI"]
@@ -380,7 +380,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.9｜手机适配与比例校正"
+text = "自助餐 v0.10｜手机画面校正"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
@@ -462,9 +462,9 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -218.0
+offset_top = -190.0
 offset_right = -16.0
-offset_bottom = -154.0
+offset_bottom = -134.0
 theme_override_styles/panel = SubResource("PanelStyle")
 
 [node name="HBox" type="HBoxContainer" parent="CanvasLayer/SupplyControls"]
@@ -492,9 +492,9 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -150.0
+offset_top = -130.0
 offset_right = -16.0
-offset_bottom = -86.0
+offset_bottom = -74.0
 theme_override_styles/panel = SubResource("PanelStyle")
 
 [node name="HBox" type="HBoxContainer" parent="CanvasLayer/PriorityControls"]
@@ -527,7 +527,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -82.0
+offset_top = -70.0
 offset_right = -16.0
 offset_bottom = -14.0
 theme_override_styles/panel = SubResource("PanelStyle")
