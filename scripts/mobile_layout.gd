@@ -15,6 +15,7 @@ var safe_margins := Vector4.ZERO
 var layout_profile := "16:9"
 
 func _ready() -> void:
+	_configure_touch_targets()
 	get_viewport().size_changed.connect(_apply_layout)
 	call_deferred("_apply_layout")
 
@@ -35,22 +36,26 @@ func _apply_layout() -> void:
 	top_panel.offset_left = left
 	top_panel.offset_right = -right
 	top_panel.offset_top = top
-	top_panel.offset_bottom = top + 260.0
+	var top_height := clampf(top_panel.get_combined_minimum_size().y + 10.0, 220.0, 258.0)
+	top_panel.offset_bottom = top + top_height
+
+	var row_height := 56.0
+	var row_gap := 4.0
 
 	controls_panel.offset_left = left
 	controls_panel.offset_right = -right
-	controls_panel.offset_top = -82.0 - bottom
+	controls_panel.offset_top = -(row_height + bottom)
 	controls_panel.offset_bottom = -bottom
 
 	priority_panel.offset_left = left
 	priority_panel.offset_right = -right
-	priority_panel.offset_top = -150.0 - bottom
-	priority_panel.offset_bottom = -86.0 - bottom
+	priority_panel.offset_top = -(row_height * 2.0 + row_gap + bottom)
+	priority_panel.offset_bottom = -(row_height + row_gap + bottom)
 
 	supply_panel.offset_left = left
 	supply_panel.offset_right = -right
-	supply_panel.offset_top = -218.0 - bottom
-	supply_panel.offset_bottom = -154.0 - bottom
+	supply_panel.offset_top = -(row_height * 3.0 + row_gap * 2.0 + bottom)
+	supply_panel.offset_bottom = -(row_height * 2.0 + row_gap * 2.0 + bottom)
 
 	if device_label != null:
 		device_label.text = "设备：%dx%d｜%s｜安全区 L%d T%d R%d B%d" % [
@@ -128,3 +133,14 @@ static func profile_for_size(viewport_size: Vector2) -> String:
 
 func _profile_for(viewport_size: Vector2) -> String:
 	return profile_for_size(viewport_size)
+
+
+func _configure_touch_targets() -> void:
+	for panel in [supply_panel, priority_panel, controls_panel]:
+		for node in panel.find_children("*", "Button", true, false):
+			var button := node as Button
+			if button == null:
+				continue
+			button.custom_minimum_size.y = 52.0
+			button.add_theme_font_size_override("font_size", 14)
+			button.focus_mode = Control.FOCUS_NONE
