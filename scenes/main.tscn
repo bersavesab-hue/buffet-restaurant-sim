@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=3]
+[gd_scene load_steps=59 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -45,6 +45,8 @@
 [ext_resource type="Resource" path="res://resources/furniture/cashier_basic.tres" id="44_cashier_def"]
 [ext_resource type="Resource" path="res://resources/furniture/kitchen_counter_basic.tres" id="45_kitchen_def"]
 [ext_resource type="Resource" path="res://resources/furniture/restroom_basic.tres" id="46_restroom_def"]
+[ext_resource type="Script" path="res://scripts/build_placement_preview.gd" id="47_build_preview"]
+[ext_resource type="Script" path="res://scripts/restaurant_build_mode.gd" id="48_build_mode"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -81,11 +83,54 @@ size = Vector2(190, 70)
 [sub_resource type="RectangleShape2D" id="ShapeTable"]
 size = Vector2(130, 76)
 
+[sub_resource type="StyleBoxFlat" id="BuildButtonStyle"]
+bg_color = Color(0.64, 0.43, 0.24, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.27, 0.17, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="BuildConfirmStyle"]
+bg_color = Color(0.38, 0.57, 0.37, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.23, 0.36, 0.22, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="BuildDangerStyle"]
+bg_color = Color(0.63, 0.35, 0.31, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.40, 0.22, 0.20, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
 [node name="RuntimeDiagnostics" type="Node" parent="."]
 script = ExtResource("15_diag")
+
+[node name="BuildModeController" type="Node" parent="."]
+script = ExtResource("48_build_mode")
+
+[node name="BuildPreview" type="Node2D" parent="."]
+script = ExtResource("47_build_preview")
+grid_path = NodePath("../RestaurantWorld/BuildGrid")
 
 [node name="RestaurantWorld" type="Node2D" parent="."]
 
@@ -581,7 +626,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.12.2｜网格布局迁移"
+text = "自助餐 v0.12.3｜装修模式原型"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
@@ -780,3 +825,101 @@ text = "2×"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "3×"
+
+[node name="BuildMode" type="Button" parent="CanvasLayer/Controls/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "装修"
+theme_override_colors/font_color = Color(1, 0.96, 0.88, 1)
+theme_override_styles/normal = SubResource("BuildButtonStyle")
+theme_override_styles/hover = SubResource("BuildButtonStyle")
+theme_override_styles/pressed = SubResource("BuildConfirmStyle")
+
+
+[node name="BuildPanel" type="PanelContainer" parent="CanvasLayer"]
+visible = false
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -178.0
+offset_right = -16.0
+offset_bottom = -18.0
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/BuildPanel"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="ModeTitle" type="Label" parent="CanvasLayer/BuildPanel/VBox"]
+layout_mode = 2
+text = "装修模式｜点选家具后拖动"
+horizontal_alignment = 1
+label_settings = SubResource("LabelSettings_main")
+
+[node name="SelectedLabel" type="Label" parent="CanvasLayer/BuildPanel/VBox"]
+layout_mode = 2
+text = "未选择家具"
+horizontal_alignment = 1
+label_settings = SubResource("LabelSettings_main")
+
+[node name="StatusLabel" type="Label" parent="CanvasLayer/BuildPanel/VBox"]
+layout_mode = 2
+text = "绿色可放，红色冲突"
+horizontal_alignment = 1
+label_settings = SubResource("LabelSettings_main")
+
+[node name="Actions" type="HBoxContainer" parent="CanvasLayer/BuildPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Rotate" type="Button" parent="CanvasLayer/BuildPanel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "旋转"
+theme_override_colors/font_color = Color(1, 0.96, 0.88, 1)
+theme_override_styles/normal = SubResource("BuildButtonStyle")
+theme_override_styles/hover = SubResource("BuildButtonStyle")
+theme_override_styles/pressed = SubResource("BuildConfirmStyle")
+
+[node name="Confirm" type="Button" parent="CanvasLayer/BuildPanel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "确认"
+theme_override_colors/font_color = Color(1, 1, 0.95, 1)
+theme_override_styles/normal = SubResource("BuildConfirmStyle")
+theme_override_styles/hover = SubResource("BuildConfirmStyle")
+theme_override_styles/pressed = SubResource("BuildButtonStyle")
+
+[node name="Cancel" type="Button" parent="CanvasLayer/BuildPanel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "取消"
+theme_override_colors/font_color = Color(1, 0.96, 0.88, 1)
+theme_override_styles/normal = SubResource("BuildButtonStyle")
+theme_override_styles/hover = SubResource("BuildButtonStyle")
+theme_override_styles/pressed = SubResource("BuildConfirmStyle")
+
+[node name="Remove" type="Button" parent="CanvasLayer/BuildPanel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "移除"
+theme_override_colors/font_color = Color(1, 0.94, 0.92, 1)
+theme_override_styles/normal = SubResource("BuildDangerStyle")
+theme_override_styles/hover = SubResource("BuildDangerStyle")
+theme_override_styles/pressed = SubResource("BuildButtonStyle")
+
+[node name="Exit" type="Button" parent="CanvasLayer/BuildPanel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "完成"
+theme_override_colors/font_color = Color(1, 0.96, 0.88, 1)
+theme_override_styles/normal = SubResource("BuildButtonStyle")
+theme_override_styles/hover = SubResource("BuildButtonStyle")
+theme_override_styles/pressed = SubResource("BuildConfirmStyle")
