@@ -34,6 +34,9 @@ func _run_startup_self_check() -> void:
 	var missing: Array[String] = []
 	var required_nodes := [
 		"CustomerLayer",
+		"RestaurantWorld/BuildGrid",
+		"RestaurantWorld/Expansion",
+		"RestaurantWorld/PlacementManager",
 		"FoodStations",
 		"Tables",
 		"Kitchen",
@@ -62,6 +65,20 @@ func _run_startup_self_check() -> void:
 
 	var station_count := main.get_node("FoodStations").get_child_count() if main.has_node("FoodStations") else 0
 	var table_count := main.get_node("Tables").get_child_count() if main.has_node("Tables") else 0
+
+	if main.has_node("FoodStations"):
+		for node in main.get_node("FoodStations").get_children():
+			if not (node is PlaceableEntity):
+				missing.append("FoodStationNotPlaceable:" + node.name)
+			elif (node as PlaceableEntity).furniture_definition == null:
+				missing.append("FurnitureDefinitionMissing:" + node.name)
+
+	if main.has_node("Tables"):
+		for node in main.get_node("Tables").get_children():
+			if not (node is PlaceableEntity):
+				missing.append("TableNotPlaceable:" + node.name)
+			elif (node as PlaceableEntity).furniture_definition == null:
+				missing.append("FurnitureDefinitionMissing:" + node.name)
 	if station_count < 3:
 		missing.append("FoodStations<3")
 	if table_count < 3:
