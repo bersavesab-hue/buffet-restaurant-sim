@@ -62,6 +62,17 @@ jobs:
             exit 1
           fi
 
+      - name: Run placeable furniture tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN"             --headless             --path .             --script res://tests/placeable_entity_test.gd             --log-file placeable-test.log             2>&1 | tee placeable-console.log
+
+          if ! grep -q "\[PLACEABLE_TEST PASS\]" placeable-test.log placeable-console.log; then
+            echo "Placeable furniture tests did not pass."
+            exit 1
+          fi
+
       - name: Run main scene smoke test
         shell: bash
         run: |
@@ -98,6 +109,8 @@ jobs:
             mobile-layout-console.log
             restaurant-world-test.log
             restaurant-world-console.log
+            placeable-test.log
+            placeable-console.log
             validation.log
             runtime-console.log
           if-no-files-found: ignore
