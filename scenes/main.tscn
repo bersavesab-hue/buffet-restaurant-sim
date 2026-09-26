@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3]
+[gd_scene load_steps=43 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -31,6 +31,9 @@
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/dining_floor.svg" id="30_dining_floor"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/buffet_floor.svg" id="31_buffet_floor"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/restroom_floor.svg" id="32_restroom_floor"]
+[ext_resource type="Script" path="res://scripts/restaurant_grid.gd" id="33_grid"]
+[ext_resource type="Script" path="res://scripts/restaurant_expansion.gd" id="34_expansion"]
+[ext_resource type="Script" path="res://scripts/restaurant_camera.gd" id="35_camera"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -73,12 +76,27 @@ script = ExtResource("1_main")
 [node name="RuntimeDiagnostics" type="Node" parent="."]
 script = ExtResource("15_diag")
 
+[node name="RestaurantWorld" type="Node2D" parent="."]
+
+[node name="BuildGrid" type="Node2D" parent="RestaurantWorld"]
+script = ExtResource("33_grid")
+z_as_relative = false
+z_index = -1500
+
+[node name="Expansion" type="Node" parent="RestaurantWorld"]
+script = ExtResource("34_expansion")
+grid_path = NodePath("../BuildGrid")
+
 [node name="WorldCamera" type="Camera2D" parent="."]
 position = Vector2(360, 640)
 enabled = true
+script = ExtResource("35_camera")
+navigation_enabled = false
+grid_path = NodePath("../RestaurantWorld/BuildGrid")
+expansion_path = NodePath("../RestaurantWorld/Expansion")
 
 [node name="WorldBackdrop" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(-360, -640, 1080, -640, 1080, 1920, -360, 1920)
+polygon = PackedVector2Array(-900, -120, 1900, -120, 1900, 1500, -900, 1500)
 color = Color(0.76, 0.70, 0.61, 1)
 z_as_relative = false
 z_index = -2000
