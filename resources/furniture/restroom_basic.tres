@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FurnitureDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/furniture_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = "restroom_basic"
+display_name = "基础卫生间"
+category = 3
+footprint = Vector2i(3, 3)
+build_cost = 6500.0
+required_stage = 0
+allow_rotation = false
+comfort = 0.0
+tags = PackedStringArray("restroom", "facility")
