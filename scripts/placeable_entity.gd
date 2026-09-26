@@ -31,36 +31,41 @@ func get_item_id() -> String:
 		return ""
 	return furniture_definition.item_id
 
-func get_footprint(for_rotation: int = rotation_index) -> Vector2i:
+func get_footprint(for_rotation: int = -1) -> Vector2i:
 	if furniture_definition == null:
 		return Vector2i.ONE
-	return furniture_definition.get_footprint(for_rotation)
+	var target_rotation := rotation_index if for_rotation < 0 else for_rotation
+	return furniture_definition.get_footprint(target_rotation)
 
 func get_occupied_cells(
-	anchor: Vector2i = grid_position,
-	for_rotation: int = rotation_index
+	anchor: Vector2i = Vector2i(-999999, -999999),
+	for_rotation: int = -1
 ) -> Array[Vector2i]:
+	var target_anchor := grid_position if anchor.x == -999999 else anchor
+	var target_rotation := rotation_index if for_rotation < 0 else for_rotation
 	var result: Array[Vector2i] = []
-	var size := get_footprint(for_rotation)
+	var size := get_footprint(target_rotation)
 	for y in range(size.y):
 		for x in range(size.x):
-			result.append(anchor + Vector2i(x, y))
+			result.append(target_anchor + Vector2i(x, y))
 	return result
 
-func can_use_cell(anchor: Vector2i, for_rotation: int = rotation_index) -> bool:
+func can_use_cell(anchor: Vector2i, for_rotation: int = -1) -> bool:
 	_resolve_grid()
 	if restaurant_grid == null or furniture_definition == null:
 		return false
 	if furniture_definition.required_stage > restaurant_grid.current_stage:
 		return false
-	for cell in get_occupied_cells(anchor, for_rotation):
+	var target_rotation := rotation_index if for_rotation < 0 else for_rotation
+	for cell in get_occupied_cells(anchor, target_rotation):
 		if not restaurant_grid.is_cell_unlocked(cell):
 			return false
 	return true
 
-func apply_grid_placement(anchor: Vector2i, new_rotation: int = rotation_index) -> bool:
+func apply_grid_placement(anchor: Vector2i, new_rotation: int = -1) -> bool:
 	_resolve_grid()
-	var normalized := posmod(new_rotation, 4)
+	var target_rotation := rotation_index if new_rotation < 0 else new_rotation
+	var normalized := posmod(target_rotation, 4)
 	if not can_use_cell(anchor, normalized):
 		return false
 	grid_position = anchor
