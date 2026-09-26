@@ -1,5 +1,5 @@
 class_name FoodStation
-extends Node2D
+extends PlaceableEntity
 
 @export var station_name: String = "餐台"
 @export_enum("staple", "meat", "seafood") var food_tag: String = "staple"
@@ -25,6 +25,7 @@ var total_perceived_value_served := 0.0
 var dish_visuals: Array[CanvasItem] = []
 
 func _ready() -> void:
+	super()
 	stock = clampf(starting_stock, 0.0, capacity)
 	for node_name in ["DishA", "DishB"]:
 		var item := get_node_or_null(node_name) as CanvasItem
