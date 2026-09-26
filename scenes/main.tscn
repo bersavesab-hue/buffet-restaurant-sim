@@ -139,7 +139,7 @@ z_as_relative = false
 z_index = -820
 
 [node name="EntranceMat" type="Sprite2D" parent="."]
-position = Vector2(360, 1112)
+position = Vector2(360, 1038)
 texture = ExtResource("28_mat")
 scale = Vector2(0.92, 0.92)
 z_as_relative = false
@@ -147,42 +147,42 @@ z_index = -930
 
 
 [node name="PlantDining" type="Sprite2D" parent="."]
-position = Vector2(62, 575)
+position = Vector2(88, 610)
 texture = ExtResource("25_plant")
 scale = Vector2(0.72, 0.72)
 z_as_relative = false
 z_index = 650
 
 [node name="DiningFloor" type="Sprite2D" parent="."]
-position = Vector2(205, 820)
+position = Vector2(250, 770)
 texture = ExtResource("30_dining_floor")
 scale = Vector2(0.95, 0.95)
 z_as_relative = false
 z_index = -948
 
 [node name="BuffetFloor" type="Sprite2D" parent="."]
-position = Vector2(552, 535)
+position = Vector2(585, 690)
 texture = ExtResource("31_buffet_floor")
 scale = Vector2(0.95, 0.95)
 z_as_relative = false
 z_index = -948
 
 [node name="RestroomFloor" type="Sprite2D" parent="."]
-position = Vector2(575, 955)
+position = Vector2(485, 930)
 texture = ExtResource("32_restroom_floor")
 scale = Vector2(0.94, 0.94)
 z_as_relative = false
 z_index = -948
 
 [node name="PlantRestroom" type="Sprite2D" parent="."]
-position = Vector2(652, 842)
+position = Vector2(548, 840)
 texture = ExtResource("25_plant")
 scale = Vector2(0.68, 0.68)
 z_as_relative = false
 z_index = 842
 
 [node name="TrashBin" type="Sprite2D" parent="."]
-position = Vector2(486, 1062)
+position = Vector2(420, 985)
 texture = ExtResource("26_bin")
 scale = Vector2(0.78, 0.78)
 z_as_relative = false
@@ -204,12 +204,13 @@ z_index = 1062
 [node name="FunctionalFurniture" type="Node2D" parent="."]
 
 [node name="CashierStation" type="Node2D" parent="FunctionalFurniture"]
-position = Vector2(130, 1040)
 z_as_relative = false
-z_index = 1040
 script = ExtResource("41_cashier_script")
 furniture_definition = ExtResource("44_cashier_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(17, 24)
+rotation_index = 0
 
 [node name="Visual" type="Sprite2D" parent="FunctionalFurniture/CashierStation"]
 position = Vector2(0, -35)
@@ -235,12 +236,13 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="KitchenFacility" type="Node2D" parent="FunctionalFurniture"]
-position = Vector2(150, 420)
 z_as_relative = false
-z_index = 420
 script = ExtResource("42_kitchen_script")
 furniture_definition = ExtResource("45_kitchen_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(13, 14)
+rotation_index = 0
 
 [node name="Visual" type="Sprite2D" parent="FunctionalFurniture/KitchenFacility"]
 position = Vector2(0, -38)
@@ -263,12 +265,13 @@ avoidance_enabled = true
 avoidance_layers = 1
 
 [node name="RestroomFacility" type="Node2D" parent="FunctionalFurniture"]
-position = Vector2(575, 970)
 z_as_relative = false
-z_index = 970
 script = ExtResource("43_restroom_script")
 furniture_definition = ExtResource("46_restroom_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(25, 22)
+rotation_index = 0
 
 [node name="Visual" type="Sprite2D" parent="FunctionalFurniture/RestroomFacility"]
 position = Vector2(0, -70)
@@ -306,11 +309,12 @@ refill_threshold = 0.48
 
 [node name="StapleStation" type="Node2D" parent="FoodStations"]
 z_as_relative = false
-z_index = 370
-position = Vector2(552, 370)
 script = ExtResource("2_food")
 furniture_definition = ExtResource("38_staple_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(18, 10)
+rotation_index = 0
 station_name = "主食台"
 food_tag = "staple"
 ingredient_id = "rice"
@@ -351,11 +355,12 @@ avoidance_layers = 1
 
 [node name="MeatStation" type="Node2D" parent="FoodStations"]
 z_as_relative = false
-z_index = 525
-position = Vector2(552, 525)
 script = ExtResource("2_food")
 furniture_definition = ExtResource("39_meat_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(20, 12)
+rotation_index = 0
 station_name = "烤肉台"
 food_tag = "meat"
 ingredient_id = "meat"
@@ -396,11 +401,12 @@ avoidance_layers = 1
 
 [node name="SeafoodStation" type="Node2D" parent="FoodStations"]
 z_as_relative = false
-z_index = 680
-position = Vector2(552, 680)
 script = ExtResource("2_food")
 furniture_definition = ExtResource("40_seafood_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(22, 14)
+rotation_index = 0
 station_name = "海鲜台"
 food_tag = "seafood"
 ingredient_id = "seafood"
@@ -443,11 +449,12 @@ avoidance_layers = 1
 
 [node name="TableA" type="Node2D" parent="Tables"]
 z_as_relative = false
-z_index = 690
-position = Vector2(160, 690)
 script = ExtResource("3_table")
 furniture_definition = ExtResource("37_table_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(15, 17)
+rotation_index = 0
 table_name = "A桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableA"]
 position = Vector2(0, -22)
@@ -472,11 +479,12 @@ avoidance_layers = 1
 
 [node name="TableB" type="Node2D" parent="Tables"]
 z_as_relative = false
-z_index = 820
-position = Vector2(292, 810)
 script = ExtResource("3_table")
 furniture_definition = ExtResource("37_table_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(16, 20)
+rotation_index = 0
 table_name = "B桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableB"]
 position = Vector2(0, -22)
@@ -501,11 +509,12 @@ avoidance_layers = 1
 
 [node name="TableC" type="Node2D" parent="Tables"]
 z_as_relative = false
-z_index = 930
-position = Vector2(160, 930)
 script = ExtResource("3_table")
 furniture_definition = ExtResource("37_table_def")
 grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+use_grid_placement = true
+grid_position = Vector2i(18, 22)
+rotation_index = 0
 table_name = "C桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableC"]
 position = Vector2(0, -22)
@@ -531,26 +540,26 @@ avoidance_layers = 1
 [node name="Staff" type="Node2D" parent="."]
 
 [node name="ServiceWorker" parent="Staff" instance=ExtResource("6_staff")]
-position = Vector2(290, 555)
+position = Vector2(280, 700)
 
 [node name="ChefWorker" parent="Staff" instance=ExtResource("7_chef")]
-position = Vector2(290, 375)
+position = Vector2(290, 520)
 
 [node name="Points" type="Node2D" parent="."]
 
 [node name="Entrance" type="Marker2D" parent="Points"]
-position = Vector2(360, 1125)
+position = Vector2(360, 1055)
 
 
 
 [node name="TableWait" type="Marker2D" parent="Points"]
-position = Vector2(68, 705)
+position = Vector2(82, 735)
 
 
 
 
 [node name="Exit" type="Marker2D" parent="Points"]
-position = Vector2(630, 1125)
+position = Vector2(630, 1055)
 
 [node name="CustomerLayer" type="Node2D" parent="."]
 
@@ -572,7 +581,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.12.1｜动线重做"
+text = "自助餐 v0.12.2｜网格布局迁移"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
