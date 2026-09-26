@@ -31,11 +31,13 @@ func _ready() -> void:
 func get_stage_count() -> int:
 	return grid.get_stage_count()
 
-func get_stage_name(stage: int = current_stage) -> String:
-	return STAGE_NAMES[clampi(stage, 0, STAGE_NAMES.size() - 1)]
+func get_stage_name(stage: int = -1) -> String:
+	var target := current_stage if stage < 0 else stage
+	return STAGE_NAMES[clampi(target, 0, STAGE_NAMES.size() - 1)]
 
-func get_stage_description(stage: int = current_stage) -> String:
-	return STAGE_DESCRIPTIONS[clampi(stage, 0, STAGE_DESCRIPTIONS.size() - 1)]
+func get_stage_description(stage: int = -1) -> String:
+	var target := current_stage if stage < 0 else stage
+	return STAGE_DESCRIPTIONS[clampi(target, 0, STAGE_DESCRIPTIONS.size() - 1)]
 
 func get_current_build_rect() -> Rect2i:
 	return grid.get_stage_rect(current_stage)
