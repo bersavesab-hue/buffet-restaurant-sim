@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FurnitureDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/furniture_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = "station_meat_basic"
+display_name = "基础烤肉台"
+category = 1
+footprint = Vector2i(3, 2)
+build_cost = 2600.0
+required_stage = 0
+allow_rotation = true
+comfort = 0.0
+tags = PackedStringArray("station", "meat", "buffet")
