@@ -51,6 +51,17 @@ jobs:
             exit 1
           fi
 
+      - name: Run restaurant world expansion tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN"             --headless             --path .             --script res://tests/restaurant_world_test.gd             --log-file restaurant-world-test.log             2>&1 | tee restaurant-world-console.log
+
+          if ! grep -q "\[RESTAURANT_WORLD_TEST PASS\]" restaurant-world-test.log restaurant-world-console.log; then
+            echo "Restaurant world expansion tests did not pass."
+            exit 1
+          fi
+
       - name: Run main scene smoke test
         shell: bash
         run: |
@@ -85,6 +96,8 @@ jobs:
           path: |
             mobile-layout-test.log
             mobile-layout-console.log
+            restaurant-world-test.log
+            restaurant-world-console.log
             validation.log
             runtime-console.log
           if-no-files-found: ignore
