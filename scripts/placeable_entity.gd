@@ -12,6 +12,7 @@ signal placement_changed(entity: PlaceableEntity, grid_position: Vector2i, rotat
 var restaurant_grid: RestaurantGrid
 
 func _ready() -> void:
+	add_to_group("placeable_furniture")
 	_resolve_grid()
 	if use_grid_placement and restaurant_grid != null:
 		_apply_world_position()
