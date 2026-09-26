@@ -68,17 +68,17 @@ func get_rect_world_bounds(rect: Rect2i) -> Rect2:
 
 	var min_cell := rect.position
 	var max_cell := rect.position + rect.size - Vector2i.ONE
-	var corners := [
+	var corners: Array[Vector2] = [
 		grid_to_world(Vector2i(min_cell.x, min_cell.y)),
 		grid_to_world(Vector2i(max_cell.x, min_cell.y)),
 		grid_to_world(Vector2i(min_cell.x, max_cell.y)),
 		grid_to_world(Vector2i(max_cell.x, max_cell.y))
 	]
 
-	var min_x := corners[0].x
-	var max_x := corners[0].x
-	var min_y := corners[0].y
-	var max_y := corners[0].y
+	var min_x: float = corners[0].x
+	var max_x: float = corners[0].x
+	var min_y: float = corners[0].y
+	var max_y: float = corners[0].y
 	for point in corners:
 		min_x = minf(min_x, point.x)
 		max_x = maxf(max_x, point.x)
