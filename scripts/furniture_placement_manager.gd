@@ -11,6 +11,7 @@ var restaurant_grid: RestaurantGrid
 
 func _ready() -> void:
 	_resolve_grid()
+	call_deferred("_register_initial_layout")
 
 func _resolve_grid() -> void:
 	if restaurant_grid != null:
@@ -103,3 +104,33 @@ func _clear_entity_cells(entity: PlaceableEntity) -> void:
 		if occupied_cells.get(cell) == entity:
 			occupied_cells.erase(cell)
 	entity_cells.erase(entity)
+
+
+func _register_initial_layout() -> void:
+	_resolve_grid()
+	if restaurant_grid == null:
+		push_error("FurniturePlacementManager: restaurant grid is unavailable")
+		return
+
+	for node in get_tree().get_nodes_in_group("placeable_furniture"):
+		var entity := node as PlaceableEntity
+		if entity == null or not entity.use_grid_placement:
+			continue
+		if not register_existing(entity):
+			push_error(
+				"FurniturePlacementManager: failed to register %s at %s" % [
+					entity.name,
+					str(entity.grid_position)
+				]
+			)
+
+	print("[LAYOUT REGISTERED] entities=%d cells=%d" % [
+		entity_cells.size(),
+		occupied_cells.size()
+	])
+
+func get_registered_count() -> int:
+	return entity_cells.size()
+
+func get_occupied_cell_count() -> int:
+	return occupied_cells.size()
