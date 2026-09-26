@@ -100,6 +100,8 @@ func set_build_overlay_visible(value: bool) -> void:
 	if build_overlay_visible == value:
 		return
 	build_overlay_visible = value
+	z_as_relative = false
+	z_index = 2200 if value else -1500
 	queue_redraw()
 
 func _draw() -> void:
