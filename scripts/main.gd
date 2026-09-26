@@ -14,12 +14,10 @@ const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
 @onready var service_worker: ServiceWorker = $Staff/ServiceWorker
 @onready var chef_worker: ChefWorker = $Staff/ChefWorker
 
-@onready var cashier_counter: Marker2D = $Points/CashierCounter
-@onready var cashier_queue_start: Marker2D = $Points/CashierQueueStart
+@onready var cashier_station: CashierStation = $FunctionalFurniture/CashierStation
+@onready var kitchen_facility: KitchenFacility = $FunctionalFurniture/KitchenFacility
+@onready var restroom_facility: RestroomFacility = $FunctionalFurniture/RestroomFacility
 @onready var table_wait_point: Marker2D = $Points/TableWait
-@onready var restroom_queue_point: Marker2D = $Points/RestroomQueue
-@onready var restroom_use_point: Marker2D = $Points/RestroomUse
-@onready var chef_prep_point: Marker2D = $Points/ChefPrep
 @onready var entrance: Marker2D = $Points/Entrance
 @onready var exit_point: Marker2D = $Points/Exit
 
@@ -130,7 +128,7 @@ func _ready() -> void:
 	kitchen.setup(stations, pantry)
 	kitchen.batch_prepared.connect(_on_kitchen_batch_prepared)
 	kitchen.ingredient_shortage.connect(_on_kitchen_ingredient_shortage)
-	chef_worker.setup(kitchen, chef_prep_point.global_position)
+	chef_worker.setup(kitchen, kitchen_facility.get_prep_position())
 	_connect_controls()
 	_apply_hud_mode()
 	day_remaining = day_duration_seconds
@@ -267,11 +265,11 @@ func _update_cashier_queue() -> void:
 	if first.has_reached_queue_target():
 		cashier_queue.remove_at(0)
 		cashier_service_customer = first
-		first.begin_cashier_service(cashier_counter.global_position)
+		first.begin_cashier_service(cashier_station.get_counter_position())
 		_refresh_cashier_queue_targets()
 
 func _refresh_cashier_queue_targets() -> void:
-	var start := cashier_queue_start.global_position
+	var start := cashier_station.get_queue_start_position()
 	for i in range(cashier_queue.size()):
 		var customer := cashier_queue[i]
 		if is_instance_valid(customer) and customer.is_waiting_for_cashier():
@@ -344,7 +342,7 @@ func _update_restroom_queue() -> void:
 	if first.has_reached_restroom_queue_target():
 		restroom_queue.remove_at(0)
 		restroom_service_customer = first
-		first.begin_restroom_use(restroom_use_point.global_position)
+		first.begin_restroom_use(restroom_facility.get_use_position())
 		_refresh_restroom_queue_targets()
 
 func _refresh_restroom_queue_targets() -> void:
@@ -352,7 +350,7 @@ func _refresh_restroom_queue_targets() -> void:
 		var customer := restroom_queue[i]
 		if is_instance_valid(customer) and customer.is_waiting_for_restroom():
 			customer.set_restroom_queue_target(
-				restroom_queue_point.global_position + Vector2(0.0, 48.0 * float(i))
+				restroom_facility.get_queue_position() + Vector2(0.0, 48.0 * float(i))
 			)
 
 func _on_restroom_released(customer: BuffetCustomer) -> void:
