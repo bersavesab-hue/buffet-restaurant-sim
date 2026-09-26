@@ -3,6 +3,9 @@ extends SceneTree
 var failures: Array[String] = []
 
 func _init() -> void:
+	call_deferred("_run_test")
+
+func _run_test() -> void:
 	var packed := load("res://scenes/main.tscn") as PackedScene
 	_expect(packed != null, "main scene must load")
 	if packed == null:
@@ -11,6 +14,11 @@ func _init() -> void:
 
 	var main := packed.instantiate()
 	root.add_child(main)
+
+	# Let the scene enter the tree so _ready/@onready and deferred layout
+	# registration complete before build mode is exercised.
+	await process_frame
+	await process_frame
 
 	var controller := main.get_node_or_null("BuildModeController") as RestaurantBuildMode
 	var grid := main.get_node_or_null("RestaurantWorld/BuildGrid") as RestaurantGrid
