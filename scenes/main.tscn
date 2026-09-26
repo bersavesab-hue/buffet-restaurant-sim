@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3]
+[gd_scene load_steps=48 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -34,6 +34,11 @@
 [ext_resource type="Script" path="res://scripts/restaurant_grid.gd" id="33_grid"]
 [ext_resource type="Script" path="res://scripts/restaurant_expansion.gd" id="34_expansion"]
 [ext_resource type="Script" path="res://scripts/restaurant_camera.gd" id="35_camera"]
+[ext_resource type="Script" path="res://scripts/furniture_placement_manager.gd" id="36_place_manager"]
+[ext_resource type="Resource" path="res://resources/furniture/table_double_wood.tres" id="37_table_def"]
+[ext_resource type="Resource" path="res://resources/furniture/station_staple_basic.tres" id="38_staple_def"]
+[ext_resource type="Resource" path="res://resources/furniture/station_meat_basic.tres" id="39_meat_def"]
+[ext_resource type="Resource" path="res://resources/furniture/station_seafood_basic.tres" id="40_seafood_def"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -85,6 +90,10 @@ z_index = -1500
 
 [node name="Expansion" type="Node" parent="RestaurantWorld"]
 script = ExtResource("34_expansion")
+grid_path = NodePath("../BuildGrid")
+
+[node name="PlacementManager" type="Node" parent="RestaurantWorld"]
+script = ExtResource("36_place_manager")
 grid_path = NodePath("../BuildGrid")
 
 [node name="WorldCamera" type="Camera2D" parent="."]
@@ -247,6 +256,8 @@ z_as_relative = false
 z_index = 370
 position = Vector2(552, 370)
 script = ExtResource("2_food")
+furniture_definition = ExtResource("38_staple_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
 station_name = "主食台"
 food_tag = "staple"
 ingredient_id = "rice"
@@ -290,6 +301,8 @@ z_as_relative = false
 z_index = 525
 position = Vector2(552, 525)
 script = ExtResource("2_food")
+furniture_definition = ExtResource("39_meat_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
 station_name = "烤肉台"
 food_tag = "meat"
 ingredient_id = "meat"
@@ -333,6 +346,8 @@ z_as_relative = false
 z_index = 680
 position = Vector2(552, 680)
 script = ExtResource("2_food")
+furniture_definition = ExtResource("40_seafood_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
 station_name = "海鲜台"
 food_tag = "seafood"
 ingredient_id = "seafood"
@@ -378,6 +393,8 @@ z_as_relative = false
 z_index = 690
 position = Vector2(160, 690)
 script = ExtResource("3_table")
+furniture_definition = ExtResource("37_table_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
 table_name = "A桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableA"]
 position = Vector2(0, -22)
@@ -405,6 +422,8 @@ z_as_relative = false
 z_index = 820
 position = Vector2(292, 810)
 script = ExtResource("3_table")
+furniture_definition = ExtResource("37_table_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
 table_name = "B桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableB"]
 position = Vector2(0, -22)
@@ -432,6 +451,8 @@ z_as_relative = false
 z_index = 930
 position = Vector2(160, 930)
 script = ExtResource("3_table")
+furniture_definition = ExtResource("37_table_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
 table_name = "C桌"
 [node name="Body" type="Sprite2D" parent="Tables/TableC"]
 position = Vector2(0, -22)
