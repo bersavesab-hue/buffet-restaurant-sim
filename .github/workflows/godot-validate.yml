@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -L --fail --retry 3             -o /tmp/godot.zip             "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
+          curl -L --fail --retry 3 -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d /tmp/godot
           GODOT_BIN="$(find /tmp/godot -maxdepth 1 -type f -name 'Godot*' | head -n 1)"
           chmod +x "$GODOT_BIN"
@@ -44,8 +44,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          "$GODOT_BIN"             --headless             --path .             --script res://tests/mobile_layout_test.gd             --log-file mobile-layout-test.log             2>&1 | tee mobile-layout-console.log
-
+          "$GODOT_BIN" --headless --path . --script res://tests/mobile_layout_test.gd --quit-after 5 --log-file mobile-layout-test.log 2>&1 | tee mobile-layout-console.log
           if ! grep -q "\[MOBILE_TEST PASS\]" mobile-layout-test.log mobile-layout-console.log; then
             echo "Mobile layout rule tests did not pass."
             exit 1
@@ -55,8 +54,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          "$GODOT_BIN"             --headless             --path .             --script res://tests/restaurant_world_test.gd             --log-file restaurant-world-test.log             2>&1 | tee restaurant-world-console.log
-
+          "$GODOT_BIN" --headless --path . --script res://tests/restaurant_world_test.gd --quit-after 5 --log-file restaurant-world-test.log 2>&1 | tee restaurant-world-console.log
           if ! grep -q "\[RESTAURANT_WORLD_TEST PASS\]" restaurant-world-test.log restaurant-world-console.log; then
             echo "Restaurant world expansion tests did not pass."
             exit 1
@@ -66,8 +64,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          "$GODOT_BIN"             --headless             --path .             --script res://tests/placeable_entity_test.gd             --log-file placeable-test.log             2>&1 | tee placeable-console.log
-
+          "$GODOT_BIN" --headless --path . --script res://tests/placeable_entity_test.gd --quit-after 5 --log-file placeable-test.log 2>&1 | tee placeable-console.log
           if ! grep -q "\[PLACEABLE_TEST PASS\]" placeable-test.log placeable-console.log; then
             echo "Placeable furniture tests did not pass."
             exit 1
@@ -77,23 +74,19 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          "$GODOT_BIN"             --headless             --path .             --quit-after 360             --log-file validation.log             2>&1 | tee runtime-console.log
+          "$GODOT_BIN" --headless --path . --quit-after 360 --log-file validation.log 2>&1 | tee runtime-console.log
           status=${PIPESTATUS[0]}
-
           if [ "$status" -ne 0 ]; then
             exit "$status"
           fi
-
           if grep -E -i "SCRIPT ERROR|Parse Error|ERROR:.*(failed|invalid|cannot|not found)|启动自检失败" validation.log runtime-console.log; then
             echo "Godot validation found runtime or parse errors."
             exit 1
           fi
-
           if ! grep -q "\[SELFTEST PASS\]" validation.log runtime-console.log; then
             echo "Runtime self-test did not complete."
             exit 1
           fi
-
           if ! grep -q "\[MOBILE_LAYOUT\]" validation.log runtime-console.log; then
             echo "Mobile layout controller did not initialize."
             exit 1
