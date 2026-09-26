@@ -7,7 +7,17 @@ signal entity_removed(entity: PlaceableEntity)
 
 @export var grid_path: NodePath
 
-@onready var restaurant_grid: RestaurantGrid = get_node(grid_path) as RestaurantGrid
+var restaurant_grid: RestaurantGrid
+
+func _ready() -> void:
+	_resolve_grid()
+
+func _resolve_grid() -> void:
+	if restaurant_grid != null:
+		return
+	if grid_path.is_empty():
+		return
+	restaurant_grid = get_node_or_null(grid_path) as RestaurantGrid
 
 var occupied_cells: Dictionary = {}
 var entity_cells: Dictionary = {}
@@ -18,6 +28,10 @@ func can_place(
 	rotation_index: int = 0
 ) -> bool:
 	if entity == null or entity.furniture_definition == null:
+		return false
+
+	_resolve_grid()
+	if restaurant_grid == null:
 		return false
 
 	entity.set_restaurant_grid(restaurant_grid)
