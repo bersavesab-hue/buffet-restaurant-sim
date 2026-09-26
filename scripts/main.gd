@@ -561,3 +561,88 @@ func _apply_hud_mode() -> void:
 	var mobile_layout := get_node_or_null("CanvasLayer/MobileLayout")
 	if mobile_layout != null and mobile_layout.has_method("refresh_layout"):
 		mobile_layout.call_deferred("refresh_layout")
+
+
+func get_furniture_move_block_reason(entity: PlaceableEntity) -> String:
+	if entity == null or not is_instance_valid(entity):
+		return "家具不可用"
+
+	if entity is BuffetTable:
+		var table := entity as BuffetTable
+		if table.get_occupied_count() > 0:
+			return "这张桌子正在被顾客使用"
+		if table.is_dirty():
+			return "脏桌清理完成后才能移动"
+		return ""
+
+	if entity is FoodStation:
+		var station := entity as FoodStation
+		if station.get_queue_size() > 0:
+			return station.station_name + "仍有顾客排队"
+		if kitchen.claimed_station == station:
+			return station.station_name + "正在执行补菜任务"
+		return ""
+
+	if entity is CashierStation:
+		if not cashier_queue.is_empty() or cashier_service_customer != null:
+			return "收银台正在服务，暂时不能移动"
+		return ""
+
+	if entity is RestroomFacility:
+		if not restroom_queue.is_empty() or restroom_service_customer != null:
+			return "卫生间正在使用，暂时不能移动"
+		return ""
+
+	if entity is KitchenFacility:
+		if kitchen.claimed_station != null:
+			return "厨师任务进行中，后厨暂时不能移动"
+		return ""
+
+	return ""
+
+func get_furniture_remove_block_reason(entity: PlaceableEntity) -> String:
+	var move_reason := get_furniture_move_block_reason(entity)
+	if not move_reason.is_empty():
+		return move_reason
+
+	if not active_customers.is_empty():
+		return "当前还有顾客在店，暂不允许移除经营家具"
+
+	if entity is CashierStation or entity is KitchenFacility or entity is RestroomFacility:
+		return "基础设施当前只能移动，不能移除"
+
+	if entity is BuffetTable or entity is FoodStation:
+		return ""
+
+	return "该物件当前不能移除"
+
+func on_build_furniture_moved(entity: PlaceableEntity) -> void:
+	if entity is CashierStation:
+		_refresh_cashier_queue_targets()
+	elif entity is RestroomFacility:
+		_refresh_restroom_queue_targets()
+	elif entity is KitchenFacility:
+		chef_worker.setup(kitchen, kitchen_facility.get_prep_position())
+	elif entity is FoodStation:
+		(entity as FoodStation).refresh_queue_targets()
+	elif entity is BuffetTable:
+		_refresh_table_wait_targets()
+
+func remove_build_furniture(entity: PlaceableEntity) -> bool:
+	if not get_furniture_remove_block_reason(entity).is_empty():
+		return false
+
+	var placement_manager := $RestaurantWorld/PlacementManager as FurniturePlacementManager
+	placement_manager.remove(entity)
+
+	if entity is FoodStation:
+		stations.erase(entity as FoodStation)
+		kitchen.setup(stations, pantry)
+	elif entity is BuffetTable:
+		tables.erase(entity as BuffetTable)
+	else:
+		return false
+
+	entity.queue_free()
+	_update_control_labels()
+	return true
