@@ -195,30 +195,11 @@ z_index = 1062
 
 
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CashierBody"]
-shape = SubResource("ShapeCashier")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="CashierBody"]
-radius = 92.0
-avoidance_enabled = true
-avoidance_layers = 1
 
 
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="KitchenBody"]
-shape = SubResource("ShapeKitchen")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="KitchenBody"]
-radius = 112.0
-avoidance_enabled = true
-avoidance_layers = 1
 
 
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RestroomBody"]
-shape = SubResource("ShapeRestroom")
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="RestroomBody"]
-radius = 92.0
-avoidance_enabled = true
-avoidance_layers = 1
 
 [node name="FunctionalFurniture" type="Node2D" parent="."]
 
