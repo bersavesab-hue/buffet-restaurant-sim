@@ -70,6 +70,16 @@ jobs:
             exit 1
           fi
 
+      - name: Run build mode lifecycle test
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path . --script res://tests/build_mode_test.gd --quit-after 5 --log-file build-mode-test.log 2>&1 | tee build-mode-console.log
+          if ! grep -q "\[BUILD_MODE_TEST PASS\]" build-mode-test.log build-mode-console.log; then
+            echo "Build mode lifecycle test did not pass."
+            exit 1
+          fi
+
       - name: Run main scene smoke test
         shell: bash
         run: |
@@ -104,6 +114,8 @@ jobs:
             restaurant-world-console.log
             placeable-test.log
             placeable-console.log
+            build-mode-test.log
+            build-mode-console.log
             validation.log
             runtime-console.log
           if-no-files-found: ignore
