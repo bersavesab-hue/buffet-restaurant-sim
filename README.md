@@ -216,3 +216,19 @@ docs/MASTER_PRODUCTION_PLAN.md
 - Android 导出版本升级到 v0.12 debug。
 
 下一步只做真机验证与微调，不继续扩玩法。
+
+
+## 可摆放家具底层
+
+扩建世界建立后，已经开始把旧的硬编码家具迁移到统一 PlaceableEntity：
+
+- 新增 FurnitureDefinition 数据资源。
+- 新增 FurniturePlacementManager 占格/冲突管理器。
+- BuffetTable 和 FoodStation 已继承 PlaceableEntity。
+- 3张双人桌和3个餐台已经拥有独立家具定义、占格、价格和扩建阶段。
+- 现有坐标暂时保留，避免本轮迁移改变当前真机画面。
+- CI 会验证旋转、占格、冲突、移动、锁区和删除释放。
+
+下一批迁移收银台、厨房、厕所，然后才真正切换到网格摆放和装修模式。
+
+详细规则见 docs/PLACEABLE_FURNITURE.md。
