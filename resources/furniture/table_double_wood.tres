@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FurnitureDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/furniture_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = "table_double_wood"
+display_name = "木质双人桌"
+category = 0
+footprint = Vector2i(2, 2)
+build_cost = 600.0
+required_stage = 0
+allow_rotation = true
+comfort = 1.0
+tags = PackedStringArray("table", "dining", "wood")
