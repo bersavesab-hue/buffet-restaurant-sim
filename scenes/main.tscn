@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3]
+[gd_scene load_steps=54 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -39,6 +39,12 @@
 [ext_resource type="Resource" path="res://resources/furniture/station_staple_basic.tres" id="38_staple_def"]
 [ext_resource type="Resource" path="res://resources/furniture/station_meat_basic.tres" id="39_meat_def"]
 [ext_resource type="Resource" path="res://resources/furniture/station_seafood_basic.tres" id="40_seafood_def"]
+[ext_resource type="Script" path="res://scripts/cashier_station.gd" id="41_cashier_script"]
+[ext_resource type="Script" path="res://scripts/kitchen_facility.gd" id="42_kitchen_script"]
+[ext_resource type="Script" path="res://scripts/restroom_facility.gd" id="43_restroom_script"]
+[ext_resource type="Resource" path="res://resources/furniture/cashier_basic.tres" id="44_cashier_def"]
+[ext_resource type="Resource" path="res://resources/furniture/kitchen_counter_basic.tres" id="45_kitchen_def"]
+[ext_resource type="Resource" path="res://resources/furniture/restroom_basic.tres" id="46_restroom_def"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -187,17 +193,8 @@ z_index = 1062
 
 
 
-[node name="CashierVisual" type="Sprite2D" parent="."]
-position = Vector2(130, 1005)
-texture = ExtResource("10_cashier")
-scale = Vector2(0.9, 0.9)
-z_as_relative = false
-z_index = 1040
 
-[node name="CashierBody" type="StaticBody2D" parent="."]
-position = Vector2(130, 1040)
-collision_layer = 1
-collision_mask = 2
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CashierBody"]
 shape = SubResource("ShapeCashier")
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="CashierBody"]
@@ -205,17 +202,8 @@ radius = 92.0
 avoidance_enabled = true
 avoidance_layers = 1
 
-[node name="KitchenVisual" type="Sprite2D" parent="."]
-position = Vector2(150, 382)
-texture = ExtResource("11_kitchen")
-scale = Vector2(0.9, 0.9)
-z_as_relative = false
-z_index = 420
 
-[node name="KitchenBody" type="StaticBody2D" parent="."]
-position = Vector2(150, 420)
-collision_layer = 1
-collision_mask = 2
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="KitchenBody"]
 shape = SubResource("ShapeKitchen")
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="KitchenBody"]
@@ -223,23 +211,107 @@ radius = 112.0
 avoidance_enabled = true
 avoidance_layers = 1
 
-[node name="RestroomVisual" type="Sprite2D" parent="."]
-position = Vector2(575, 900)
-texture = ExtResource("12_restroom")
-scale = Vector2(0.86, 0.86)
-z_as_relative = false
-z_index = 970
 
-[node name="RestroomBody" type="StaticBody2D" parent="."]
-position = Vector2(575, 970)
-collision_layer = 1
-collision_mask = 2
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RestroomBody"]
 shape = SubResource("ShapeRestroom")
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="RestroomBody"]
 radius = 92.0
 avoidance_enabled = true
 avoidance_layers = 1
+
+[node name="FunctionalFurniture" type="Node2D" parent="."]
+
+[node name="CashierStation" type="Node2D" parent="FunctionalFurniture"]
+position = Vector2(130, 1040)
+z_as_relative = false
+z_index = 1040
+script = ExtResource("41_cashier_script")
+furniture_definition = ExtResource("44_cashier_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+
+[node name="Visual" type="Sprite2D" parent="FunctionalFurniture/CashierStation"]
+position = Vector2(0, -35)
+texture = ExtResource("10_cashier")
+scale = Vector2(0.9, 0.9)
+
+[node name="CounterPoint" type="Marker2D" parent="FunctionalFurniture/CashierStation"]
+position = Vector2(112, 2)
+
+[node name="QueueStart" type="Marker2D" parent="FunctionalFurniture/CashierStation"]
+position = Vector2(160, 4)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="FunctionalFurniture/CashierStation"]
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FunctionalFurniture/CashierStation/StaticBody2D"]
+shape = SubResource("ShapeCashier")
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="FunctionalFurniture/CashierStation"]
+radius = 92.0
+avoidance_enabled = true
+avoidance_layers = 1
+
+[node name="KitchenFacility" type="Node2D" parent="FunctionalFurniture"]
+position = Vector2(150, 420)
+z_as_relative = false
+z_index = 420
+script = ExtResource("42_kitchen_script")
+furniture_definition = ExtResource("45_kitchen_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+
+[node name="Visual" type="Sprite2D" parent="FunctionalFurniture/KitchenFacility"]
+position = Vector2(0, -38)
+texture = ExtResource("11_kitchen")
+scale = Vector2(0.9, 0.9)
+
+[node name="PrepPoint" type="Marker2D" parent="FunctionalFurniture/KitchenFacility"]
+position = Vector2(135, 0)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="FunctionalFurniture/KitchenFacility"]
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FunctionalFurniture/KitchenFacility/StaticBody2D"]
+shape = SubResource("ShapeKitchen")
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="FunctionalFurniture/KitchenFacility"]
+radius = 112.0
+avoidance_enabled = true
+avoidance_layers = 1
+
+[node name="RestroomFacility" type="Node2D" parent="FunctionalFurniture"]
+position = Vector2(575, 970)
+z_as_relative = false
+z_index = 970
+script = ExtResource("43_restroom_script")
+furniture_definition = ExtResource("46_restroom_def")
+grid_path = NodePath("../../RestaurantWorld/BuildGrid")
+
+[node name="Visual" type="Sprite2D" parent="FunctionalFurniture/RestroomFacility"]
+position = Vector2(0, -70)
+texture = ExtResource("12_restroom")
+scale = Vector2(0.86, 0.86)
+
+[node name="QueuePoint" type="Marker2D" parent="FunctionalFurniture/RestroomFacility"]
+position = Vector2(-127, -40)
+
+[node name="UsePoint" type="Marker2D" parent="FunctionalFurniture/RestroomFacility"]
+position = Vector2(-105, 0)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="FunctionalFurniture/RestroomFacility"]
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FunctionalFurniture/RestroomFacility/StaticBody2D"]
+shape = SubResource("ShapeRestroom")
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="FunctionalFurniture/RestroomFacility"]
+radius = 92.0
+avoidance_enabled = true
+avoidance_layers = 1
+
 
 [node name="Pantry" type="Node" parent="."]
 script = ExtResource("5_pantry")
@@ -488,23 +560,13 @@ position = Vector2(290, 375)
 [node name="Entrance" type="Marker2D" parent="Points"]
 position = Vector2(360, 1125)
 
-[node name="CashierCounter" type="Marker2D" parent="Points"]
-position = Vector2(242, 1042)
 
-[node name="CashierQueueStart" type="Marker2D" parent="Points"]
-position = Vector2(290, 1044)
 
 [node name="TableWait" type="Marker2D" parent="Points"]
 position = Vector2(68, 705)
 
-[node name="RestroomQueue" type="Marker2D" parent="Points"]
-position = Vector2(448, 930)
 
-[node name="RestroomUse" type="Marker2D" parent="Points"]
-position = Vector2(470, 970)
 
-[node name="ChefPrep" type="Marker2D" parent="Points"]
-position = Vector2(285, 420)
 
 [node name="Exit" type="Marker2D" parent="Points"]
 position = Vector2(630, 1125)
