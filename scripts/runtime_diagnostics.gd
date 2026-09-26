@@ -30,6 +30,7 @@ func _process(delta: float) -> void:
 
 func _run_startup_self_check() -> void:
 	await get_tree().process_frame
+	await get_tree().process_frame
 
 	var missing: Array[String] = []
 	var required_nodes := [
@@ -93,6 +94,13 @@ func _run_startup_self_check() -> void:
 	if table_count < 3:
 		missing.append("Tables<3")
 
+	var placement_manager := main.get_node_or_null("RestaurantWorld/PlacementManager") as FurniturePlacementManager
+	if placement_manager != null:
+		if placement_manager.get_registered_count() != 9:
+			missing.append("GridFurnitureRegistered!=9")
+		if placement_manager.get_occupied_cell_count() != 57:
+			missing.append("GridFurnitureCells!=57")
+
 	if not missing.is_empty():
 		var message := "启动自检失败：" + ", ".join(missing)
 		push_error(message)
@@ -101,7 +109,7 @@ func _run_startup_self_check() -> void:
 		return
 
 	self_check_ok = true
-	print("[SELFTEST PASS] v0.8 runtime structure OK | stations=%d tables=%d" % [station_count, table_count])
+	print("[SELFTEST PASS] grid layout OK | stations=%d tables=%d furniture=9 cells=57" % [station_count, table_count])
 	if diagnostics_label != null:
 		diagnostics_label.text = "诊断：OK"
 
