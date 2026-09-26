@@ -6,7 +6,7 @@ signal stage_changed(stage: int, build_rect: Rect2i)
 const GRID_SIZE := Vector2i(44, 36)
 const CELL_SIZE := Vector2(64.0, 32.0)
 const HALF_CELL := Vector2(32.0, 16.0)
-const WORLD_ORIGIN := Vector2(360.0, 40.0)
+const WORLD_ORIGIN := Vector2(360.0, 160.0)
 
 const STAGE_RECTS: Array[Rect2i] = [
 	Rect2i(13, 9, 18, 18),
