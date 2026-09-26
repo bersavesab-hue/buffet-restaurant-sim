@@ -43,8 +43,10 @@ func _run_startup_self_check() -> void:
 		"Pantry",
 		"Staff/ServiceWorker",
 		"Staff/ChefWorker",
+		"FunctionalFurniture/CashierStation",
+		"FunctionalFurniture/KitchenFacility",
+		"FunctionalFurniture/RestroomFacility",
 		"Points/Entrance",
-		"Points/CashierQueueStart",
 		"Points/Exit"
 	]
 	for path in required_nodes:
@@ -79,6 +81,13 @@ func _run_startup_self_check() -> void:
 				missing.append("TableNotPlaceable:" + node.name)
 			elif (node as PlaceableEntity).furniture_definition == null:
 				missing.append("FurnitureDefinitionMissing:" + node.name)
+	if main.has_node("FunctionalFurniture"):
+		for node in main.get_node("FunctionalFurniture").get_children():
+			if not (node is PlaceableEntity):
+				missing.append("FunctionalFurnitureNotPlaceable:" + node.name)
+			elif (node as PlaceableEntity).furniture_definition == null:
+				missing.append("FurnitureDefinitionMissing:" + node.name)
+
 	if station_count < 3:
 		missing.append("FoodStations<3")
 	if table_count < 3:
