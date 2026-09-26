@@ -1,5 +1,5 @@
 class_name BuffetTable
-extends Node2D
+extends PlaceableEntity
 
 signal became_dirty(table: BuffetTable)
 signal cleaned(table: BuffetTable)
@@ -15,6 +15,7 @@ var dirty := false
 var has_been_used := false
 
 func _ready() -> void:
+	super()
 	for node in $SeatPoints.get_children():
 		if node is Marker2D:
 			seat_points.append(node as Marker2D)
