@@ -97,6 +97,9 @@ func get_queue_size() -> int:
 	_cleanup_queue()
 	return customer_queue.size()
 
+func refresh_queue_targets() -> void:
+	_refresh_queue_targets()
+
 func take_portion(requested_units: float) -> Dictionary:
 	if stock <= 0.0:
 		return {}
