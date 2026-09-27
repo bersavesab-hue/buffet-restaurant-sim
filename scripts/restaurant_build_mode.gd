@@ -22,6 +22,7 @@ signal build_mode_changed(active: bool)
 @onready var supply_controls: CanvasItem = main.get_node("CanvasLayer/SupplyControls") as CanvasItem
 @onready var priority_controls: CanvasItem = main.get_node("CanvasLayer/PriorityControls") as CanvasItem
 @onready var operation_controls: CanvasItem = main.get_node("CanvasLayer/Controls") as CanvasItem
+@onready var game_hud: GameHUD = main.get_node("CanvasLayer/GameHUD") as GameHUD
 
 var build_mode := false
 var previous_pause_state := false
@@ -52,6 +53,8 @@ func enter_build_mode() -> void:
 	supply_controls.visible = false
 	priority_controls.visible = false
 	operation_controls.visible = false
+	if game_hud != null:
+		game_hud.set_build_mode_active(true)
 
 	grid.set_build_overlay_visible(true)
 	world_camera.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -75,9 +78,11 @@ func exit_build_mode() -> void:
 	world_camera.process_mode = Node.PROCESS_MODE_INHERIT
 
 	build_panel.visible = false
-	supply_controls.visible = true
-	priority_controls.visible = true
-	operation_controls.visible = true
+	supply_controls.visible = false
+	priority_controls.visible = false
+	operation_controls.visible = false
+	if game_hud != null:
+		game_hud.set_build_mode_active(false)
 	build_mode = false
 	get_tree().paused = previous_pause_state
 
