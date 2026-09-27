@@ -1,4 +1,4 @@
-[gd_scene load_steps=59 format=3]
+[gd_scene load_steps=60 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -47,6 +47,7 @@
 [ext_resource type="Resource" path="res://resources/furniture/restroom_basic.tres" id="46_restroom_def"]
 [ext_resource type="Script" path="res://scripts/build_placement_preview.gd" id="47_build_preview"]
 [ext_resource type="Script" path="res://scripts/restaurant_build_mode.gd" id="48_build_mode"]
+[ext_resource type="PackedScene" path="res://scenes/game_hud.tscn" id="49_game_hud"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_main"]
 vertices = PackedVector2Array(45, 285, 675, 285, 675, 1160, 45, 1160)
@@ -613,7 +614,10 @@ position = Vector2(630, 1055)
 [node name="MobileLayout" type="Node" parent="CanvasLayer"]
 script = ExtResource("16_mobile")
 
+[node name="GameHUD" parent="CanvasLayer" instance=ExtResource("49_game_hud")]
+
 [node name="UI" type="PanelContainer" parent="CanvasLayer"]
+visible = false
 anchor_right = 1.0
 offset_left = 16.0
 offset_top = 12.0
@@ -717,6 +721,7 @@ text = "展开详情"
 focus_mode = 0
 
 [node name="SupplyControls" type="PanelContainer" parent="CanvasLayer"]
+visible = false
 anchor_left = 0.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -747,6 +752,7 @@ size_flags_horizontal = 3
 text = "海鲜补菜：开"
 
 [node name="PriorityControls" type="PanelContainer" parent="CanvasLayer"]
+visible = false
 anchor_left = 0.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -782,6 +788,7 @@ size_flags_horizontal = 3
 text = "海鲜"
 
 [node name="Controls" type="PanelContainer" parent="CanvasLayer"]
+visible = false
 anchor_left = 0.0
 anchor_top = 1.0
 anchor_right = 1.0
