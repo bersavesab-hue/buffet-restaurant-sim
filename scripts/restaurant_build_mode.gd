@@ -58,7 +58,7 @@ func enter_build_mode() -> void:
 
 	grid.set_build_overlay_visible(true)
 	world_camera.process_mode = Node.PROCESS_MODE_ALWAYS
-	world_camera.set_navigation_enabled(true)
+	world_camera.show_build_view()
 	get_tree().paused = true
 
 	status_label.text = "点选家具后拖到目标格；空白处拖动可浏览餐厅"
@@ -74,7 +74,7 @@ func exit_build_mode() -> void:
 	_clear_selection()
 	grid.set_build_overlay_visible(false)
 	preview.clear_preview()
-	world_camera.set_navigation_enabled(false)
+	world_camera.show_business_view()
 	world_camera.process_mode = Node.PROCESS_MODE_INHERIT
 
 	build_panel.visible = false
