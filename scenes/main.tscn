@@ -630,7 +630,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.12.3｜装修模式原型"
+text = "自助餐 v0.13｜正式UI重构"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
