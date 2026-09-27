@@ -31,24 +31,29 @@ func _run_test() -> void:
 	_expect(panel != null, "BuildPanel missing")
 
 	if controller != null and grid != null and camera != null and panel != null:
+		var business_zoom := camera.zoom.x
+		_expect(business_zoom > 1.0, "normal business view should be closer than 1.0x")
+
 		controller.enter_build_mode()
 		_expect(paused, "entering build mode must pause SceneTree")
 		_expect(panel.visible, "build panel must become visible")
 		_expect(grid.build_overlay_visible, "build grid overlay must be visible")
 		_expect(camera.navigation_enabled, "camera navigation must enable in build mode")
+		_expect(camera.zoom.x < business_zoom, "build mode must zoom farther out than business view")
 
 		controller.exit_build_mode()
 		_expect(not paused, "leaving build mode must restore unpaused state")
 		_expect(not panel.visible, "build panel must hide after exit")
 		_expect(not grid.build_overlay_visible, "grid overlay must hide after exit")
 		_expect(not camera.navigation_enabled, "camera navigation must disable after exit")
+		_expect(camera.zoom.x > 1.0, "business zoom must restore after leaving build mode")
 
 	main.queue_free()
 	_finish()
 
 func _finish() -> void:
 	if failures.is_empty():
-		print("[BUILD_MODE_TEST PASS] pause, overlay, camera and build panel lifecycle OK")
+		print("[BUILD_MODE_TEST PASS] pause, overlay, close business camera, build overview and lifecycle OK")
 		quit(0)
 	else:
 		for failure in failures:
