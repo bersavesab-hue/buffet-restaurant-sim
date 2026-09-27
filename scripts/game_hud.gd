@@ -87,7 +87,10 @@ func _ready() -> void:
 	diagnostics_button.pressed.connect(_toggle_diagnostics)
 
 	get_viewport().size_changed.connect(_apply_layout)
-	call_deferred("_apply_layout")
+	call_deferred("_finish_setup")
+
+func _finish_setup() -> void:
+	_apply_layout()
 	_refresh_all()
 
 func _process(delta: float) -> void:
@@ -181,7 +184,7 @@ func _refresh_primary_stats() -> void:
 	var food_cost := float(main.get("food_cost"))
 	var utility_cost := float(main.get("utility_cost"))
 	var profit := revenue - food_cost - utility_cost
-	profit_label.text = "今日利润 %+.0f" % profit
+	profit_label.text = "今日利润 " + _format_signed_money(profit)
 
 	speed_nav.text = "%g×" % float(main.get("selected_speed"))
 
@@ -198,7 +201,9 @@ func _refresh_drawer_controls() -> void:
 		supply_seafood.text = "海鲜  %s" % ("补菜中" if seafood.is_refill_enabled() else "已暂停")
 
 	var kitchen = main.get("kitchen")
-	var priority := str(kitchen.priority_tag)
+	var priority := "auto"
+	if kitchen != null:
+		priority = str(kitchen.priority_tag)
 	priority_auto.text = "自动" + (" ·" if priority == "auto" else "")
 	priority_staple.text = "主食" + (" ·" if priority == "staple" else "")
 	priority_meat.text = "肉类" + (" ·" if priority == "meat" else "")
@@ -213,8 +218,8 @@ func _refresh_drawer_controls() -> void:
 	var food_cost := float(main.get("food_cost"))
 	var utility_cost := float(main.get("utility_cost"))
 	var profit := revenue - food_cost - utility_cost
-	business_summary.text = "营业额 ¥%.0f   食材 ¥%.0f   电费 ¥%.1f   利润 %+.0f" % [
-		revenue, food_cost, utility_cost, profit
+	business_summary.text = "营业额 ¥%.0f   食材 ¥%.0f   电费 ¥%.1f   利润 %s" % [
+		revenue, food_cost, utility_cost, _format_signed_money(profit)
 	]
 	review_summary.text = "顾客反馈：" + str(main.get("last_review"))
 
@@ -274,3 +279,12 @@ func _toggle_diagnostics() -> void:
 		return
 	legacy_ui.visible = not legacy_ui.visible
 	diagnostics_button.text = "关闭开发信息" if legacy_ui.visible else "显示开发信息"
+
+
+func _format_signed_money(value: float) -> String:
+	var rounded := int(round(value))
+	if rounded > 0:
+		return "+¥%d" % rounded
+	if rounded < 0:
+		return "-¥%d" % abs(rounded)
+	return "¥0"
