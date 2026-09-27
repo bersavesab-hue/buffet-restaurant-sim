@@ -2,3 +2,6 @@
 *.tmp
 *.log
 .DS_Store
+*.import
+*.gd.uid
+build/

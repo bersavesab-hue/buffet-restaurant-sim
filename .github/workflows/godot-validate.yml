@@ -80,6 +80,23 @@ jobs:
             exit 1
           fi
 
+      - name: Run day progression and save recovery test
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path . --script res://tests/day_progression_test.gd --log-file day-progression-test.log 2>&1 | tee day-progression-console.log
+          grep -q "\[DAY_PROGRESSION_TEST PASS\]" day-progression-test.log day-progression-console.log
+
+      - name: Run real customer business cycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path . --script res://tests/business_cycle_test.gd --log-file business-cycle-test.log 2>&1 | tee business-cycle-console.log
+          grep -q "\[BUSINESS_CYCLE_TEST PASS\]" business-cycle-test.log business-cycle-console.log
+          if grep -E "SCRIPT ERROR|Parse Error|顾客疑似卡住|BUSINESS_CYCLE_TEST FAIL" business-cycle-test.log business-cycle-console.log; then
+            exit 1
+          fi
+
       - name: Run main scene smoke test
         shell: bash
         run: |
@@ -116,6 +133,10 @@ jobs:
             placeable-console.log
             build-mode-test.log
             build-mode-console.log
+            day-progression-test.log
+            day-progression-console.log
+            business-cycle-test.log
+            business-cycle-console.log
             validation.log
             runtime-console.log
           if-no-files-found: ignore

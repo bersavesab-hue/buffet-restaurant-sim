@@ -131,6 +131,17 @@ func _physics_process(_delta: float) -> void:
 
 	if NavigationServer2D.map_get_iteration_id(navigation_agent.get_navigation_map()) == 0:
 		return
+	# Local obstacle avoidance may stop just short of a service marker.
+	# Complete the action once the customer is physically beside the station.
+	if state == State.CASHIER and global_position.distance_to(cashier_counter_position) <= 36.0:
+		_arrive()
+		return
+	if state == State.RESTROOM and global_position.distance_to(restroom_position) <= 36.0:
+		_arrive()
+		return
+	if state == State.TABLE and reserved_table != null and global_position.distance_to(reserved_table.get_customer_seat_position(self)) <= 36.0:
+		_arrive()
+		return
 
 	if navigation_agent.is_navigation_finished():
 		_arrive()
@@ -222,7 +233,7 @@ func set_cashier_queue_target(target: Vector2) -> void:
 		_set_target(queue_target)
 
 func has_reached_queue_target() -> bool:
-	return state == State.WAIT_CASHIER and global_position.distance_to(queue_target) <= 16.0
+	return state == State.WAIT_CASHIER and global_position.distance_to(queue_target) <= 32.0
 
 func is_waiting_for_cashier() -> bool:
 	return state == State.WAIT_CASHIER
@@ -238,7 +249,7 @@ func set_food_queue_target(station: FoodStation, target: Vector2) -> void:
 	_set_target(food_queue_target)
 
 func has_reached_food_queue_target(station: FoodStation) -> bool:
-	return state == State.WAIT_FOOD and selected_station == station and global_position.distance_to(food_queue_target) <= 16.0
+	return state == State.WAIT_FOOD and selected_station == station and global_position.distance_to(food_queue_target) <= 32.0
 
 func is_waiting_for_food(station: FoodStation) -> bool:
 	return state == State.WAIT_FOOD and selected_station == station
@@ -273,7 +284,7 @@ func set_restroom_queue_target(target: Vector2) -> void:
 		_set_target(restroom_queue_target)
 
 func has_reached_restroom_queue_target() -> bool:
-	return state == State.WAIT_RESTROOM and global_position.distance_to(restroom_queue_target) <= 16.0
+	return state == State.WAIT_RESTROOM and global_position.distance_to(restroom_queue_target) <= 32.0
 
 func is_waiting_for_restroom() -> bool:
 	return state == State.WAIT_RESTROOM

@@ -93,17 +93,21 @@ func _run_startup_self_check() -> void:
 			elif (node as PlaceableEntity).furniture_definition == null:
 				missing.append("FurnitureDefinitionMissing:" + node.name)
 
-	if station_count < 3:
-		missing.append("FoodStations<3")
-	if table_count < 3:
-		missing.append("Tables<3")
+	if station_count < 1:
+		missing.append("FoodStations<1")
+	if table_count < 1:
+		missing.append("Tables<1")
 
 	var placement_manager := main.get_node_or_null("RestaurantWorld/PlacementManager") as FurniturePlacementManager
 	if placement_manager != null:
-		if placement_manager.get_registered_count() != 9:
-			missing.append("GridFurnitureRegistered!=9")
-		if placement_manager.get_occupied_cell_count() != 57:
-			missing.append("GridFurnitureCells!=57")
+		var expected_count := station_count + table_count + 3
+		if placement_manager.get_registered_count() != expected_count:
+			missing.append("GridFurnitureRegistered!=%d" % expected_count)
+		var expected_cells := 0
+		for entity in placement_manager.get_registered_entities():
+			expected_cells += entity.get_occupied_cells().size()
+		if placement_manager.get_occupied_cell_count() != expected_cells:
+			missing.append("GridFurnitureCells!=%d" % expected_cells)
 
 	if not missing.is_empty():
 		var message := "启动自检失败：" + ", ".join(missing)
@@ -113,7 +117,9 @@ func _run_startup_self_check() -> void:
 		return
 
 	self_check_ok = true
-	print("[SELFTEST PASS] grid layout OK | stations=%d tables=%d furniture=9 cells=57" % [station_count, table_count])
+	print("[SELFTEST PASS] grid layout OK | stations=%d tables=%d furniture=%d cells=%d" % [
+		station_count, table_count, placement_manager.get_registered_count(), placement_manager.get_occupied_cell_count()
+	])
 	if diagnostics_label != null:
 		diagnostics_label.text = "诊断：OK"
 
@@ -156,7 +162,7 @@ func _track_customers(delta: float) -> void:
 				]
 				active_warnings.append(text)
 				if not bool(watch["warned"]):
-					push_warning(text + " @ " + str(customer.global_position))
+					push_warning(text + " @ " + str(customer.global_position) + " → " + str(customer.navigation_agent.target_position))
 					watch["warned"] = true
 
 		watch["position"] = customer.global_position

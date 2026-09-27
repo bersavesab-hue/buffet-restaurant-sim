@@ -49,6 +49,7 @@ extends Control
 @onready var business_summary: Label = $Drawer/VBox/BusinessBox/Summary
 @onready var review_summary: Label = $Drawer/VBox/BusinessBox/Review
 @onready var build_button: Button = $Drawer/VBox/BusinessBox/Build
+@onready var next_day_button: Button = $Drawer/VBox/BusinessBox/NextDay
 
 @onready var diagnostics_button: Button = $Drawer/VBox/SettingsRow/Diagnostics
 @onready var close_button: Button = $Drawer/VBox/Close
@@ -84,6 +85,7 @@ func _ready() -> void:
 	temp_up.pressed.connect(func(): main.call("_on_temp_up_pressed"))
 
 	build_button.pressed.connect(_enter_build_mode)
+	next_day_button.pressed.connect(func(): main.call("start_next_day"))
 	diagnostics_button.pressed.connect(_toggle_diagnostics)
 
 	get_viewport().size_changed.connect(_apply_layout)
@@ -136,7 +138,7 @@ func _apply_layout() -> void:
 
 	drawer.offset_left = left
 	drawer.offset_right = -right
-	drawer.offset_top = -196.0 - bottom
+	drawer.offset_top = (-320.0 if active_drawer == "business" else -196.0) - bottom
 	drawer.offset_bottom = -92.0 - bottom
 
 func _refresh_all() -> void:
@@ -151,10 +153,10 @@ func _refresh_primary_stats() -> void:
 	var hour := total_minutes / 60
 	var minute := total_minutes % 60
 
-	day_time_label.text = "第1天  %02d:%02d" % [hour, minute]
+	day_time_label.text = "第%d天  %02d:%02d" % [int(main.get("day_index")), hour, minute]
 
 	var settled := bool(main.get("day_settled"))
-	business_label.text = "已打烊" if settled else "营业中"
+	business_label.text = "已打烊" if settled else ("收店中" if remaining <= 0.0 else "营业中")
 
 	var revenue := float(main.get("ticket_revenue"))
 	revenue_label.text = "营业额  ¥%d" % int(round(revenue))
@@ -218,10 +220,11 @@ func _refresh_drawer_controls() -> void:
 	var food_cost := float(main.get("food_cost"))
 	var utility_cost := float(main.get("utility_cost"))
 	var profit := revenue - food_cost - utility_cost
-	business_summary.text = "营业额 ¥%.0f   食材 ¥%.0f   电费 ¥%.1f   利润 %s" % [
-		revenue, food_cost, utility_cost, _format_signed_money(profit)
+	business_summary.text = "营业额 ¥%.0f   食材 ¥%.0f   电费 ¥%.1f\n利润 %s   资金 ¥%.0f" % [
+		revenue, food_cost, utility_cost, _format_signed_money(profit), float(main.get("cash_balance"))
 	]
 	review_summary.text = "顾客反馈：" + str(main.get("last_review"))
+	next_day_button.visible = bool(main.get("day_settled"))
 
 func _toggle_drawer(name: String) -> void:
 	if build_mode_active:
@@ -250,10 +253,12 @@ func _toggle_drawer(name: String) -> void:
 		"settings":
 			drawer_title.text = "设置"
 	_refresh_drawer_controls()
+	_apply_layout()
 
 func _close_drawer() -> void:
 	active_drawer = ""
 	drawer.visible = false
+	_apply_layout()
 
 func _cycle_speed() -> void:
 	if build_mode_active:

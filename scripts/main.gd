@@ -1,6 +1,7 @@
 extends Node2D
 
 const CUSTOMER_SCENE := preload("res://scenes/customer.tscn")
+const SAVE_PATH := "user://buffet_progress_v1.json"
 
 @export var ticket_price: float = 69.0
 @export var day_duration_seconds: float = 90.0
@@ -82,6 +83,11 @@ var selected_speed := 1.0
 var debug_details_visible := false
 
 var day_settled := false
+var day_index := 1
+var cash_balance := 800.0
+var removed_furniture: Array[String] = []
+var saved_furniture: Dictionary = {}
+var restoring_progress := false
 var rng := RandomNumberGenerator.new()
 
 var customer_profiles := [
@@ -123,6 +129,7 @@ var customer_profiles := [
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	rng.randomize()
+	_load_progress()
 	_collect_world_objects()
 	_register_initial_inventory_cost()
 	kitchen.setup(stations, pantry)
@@ -135,6 +142,82 @@ func _ready() -> void:
 	spawn_timer = 0.4
 	status_label.text = "营业中：69元大众自助"
 	_update_control_labels()
+	call_deferred("_restore_furniture")
+
+func _load_progress() -> void:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return
+	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if file == null:
+		return
+	var data = JSON.parse_string(file.get_as_text())
+	if not data is Dictionary or int(data.get("version", 0)) != 1:
+		return
+	day_index = maxi(1, int(data.get("next_day", 1)))
+	cash_balance = float(data.get("cash", 800.0))
+	removed_furniture.clear()
+	for item in data.get("removed", []):
+		removed_furniture.append(str(item))
+	saved_furniture = data.get("furniture", {})
+
+func _save_progress(next_day: int) -> void:
+	if restoring_progress:
+		return
+	var furniture := {}
+	for entity in $RestaurantWorld/PlacementManager.get_registered_entities():
+		furniture[entity.name] = [entity.grid_position.x, entity.grid_position.y, entity.rotation_index]
+	var data := {
+		"version": 1,
+		"next_day": next_day,
+		"cash": cash_balance,
+		"removed": removed_furniture,
+		"furniture": furniture
+	}
+	var temp_path := SAVE_PATH + ".tmp"
+	var file := FileAccess.open(temp_path, FileAccess.WRITE)
+	if file == null:
+		push_error("无法保存餐厅进度")
+		return
+	file.store_string(JSON.stringify(data))
+	file.close()
+	var result := DirAccess.rename_absolute(ProjectSettings.globalize_path(temp_path), ProjectSettings.globalize_path(SAVE_PATH))
+	if result != OK:
+		push_error("无法提交餐厅存档：%d" % result)
+
+func _restore_furniture() -> void:
+	if saved_furniture.is_empty() and removed_furniture.is_empty():
+		return
+	restoring_progress = true
+	var manager := $RestaurantWorld/PlacementManager as FurniturePlacementManager
+	var entities := manager.get_registered_entities()
+	for entity in entities:
+		manager.remove(entity)
+	for entity in entities:
+		if removed_furniture.has(entity.name):
+			if entity is FoodStation:
+				stations.erase(entity as FoodStation)
+			elif entity is BuffetTable:
+				tables.erase(entity as BuffetTable)
+			entity.queue_free()
+			continue
+		var saved: Array = saved_furniture.get(entity.name, [])
+		var anchor := entity.grid_position
+		var rotation := entity.rotation_index
+		if saved.size() == 3:
+			anchor = Vector2i(int(saved[0]), int(saved[1]))
+			rotation = int(saved[2])
+		if not manager.place(entity, anchor, rotation):
+			push_warning("家具存档位置冲突：%s" % entity.name)
+			manager.place(entity, entity.grid_position, entity.rotation_index)
+	kitchen.setup(stations, pantry)
+	restoring_progress = false
+	_update_control_labels()
+
+func start_next_day() -> void:
+	if not day_settled:
+		return
+	Engine.time_scale = 1.0
+	get_tree().reload_current_scene()
 
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("restart_demo"):
@@ -404,6 +487,8 @@ func _on_customer_metrics_changed(_customer: BuffetCustomer, _fullness_ratio: fl
 	pass
 
 func _settle_day() -> void:
+	if day_settled:
+		return
 	day_settled = true
 	kitchen.set_active(false)
 	Engine.time_scale = 1.0
@@ -411,6 +496,8 @@ func _settle_day() -> void:
 	_update_control_labels()
 
 	var profit := ticket_revenue - food_cost - utility_cost
+	cash_balance += profit
+	_save_progress(day_index + 1)
 	var average_payback := 0.0
 	var average_rating := 0.0
 	if finished_today > 0:
@@ -437,6 +524,8 @@ func _on_temp_up_pressed() -> void:
 	_update_control_labels()
 
 func _set_speed(multiplier: float) -> void:
+	if day_settled:
+		return
 	selected_speed = multiplier
 	Engine.time_scale = multiplier
 	_update_control_labels()
@@ -610,6 +699,10 @@ func get_furniture_remove_block_reason(entity: PlaceableEntity) -> String:
 
 	if entity is CashierStation or entity is KitchenFacility or entity is RestroomFacility:
 		return "基础设施当前只能移动，不能移除"
+	if entity is BuffetTable and tables.size() <= 1:
+		return "至少需要保留一张餐桌"
+	if entity is FoodStation and stations.size() <= 1:
+		return "至少需要保留一个餐台"
 
 	if entity is BuffetTable or entity is FoodStation:
 		return ""
@@ -627,6 +720,7 @@ func on_build_furniture_moved(entity: PlaceableEntity) -> void:
 		(entity as FoodStation).refresh_queue_targets()
 	elif entity is BuffetTable:
 		_refresh_table_wait_targets()
+	_save_progress(day_index + (1 if day_settled else 0))
 
 func remove_build_furniture(entity: PlaceableEntity) -> bool:
 	if not get_furniture_remove_block_reason(entity).is_empty():
@@ -643,6 +737,8 @@ func remove_build_furniture(entity: PlaceableEntity) -> bool:
 	else:
 		return false
 
+	removed_furniture.append(entity.name)
 	entity.queue_free()
 	_update_control_labels()
+	_save_progress(day_index + (1 if day_settled else 0))
 	return true

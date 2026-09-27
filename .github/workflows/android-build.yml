@@ -84,17 +84,7 @@ jobs:
           set -euo pipefail
 
           mkdir -p "$HOME/.android"
-          rm -f "$HOME/.android/debug.keystore"
-          keytool \
-            -keyalg RSA \
-            -genkeypair \
-            -alias androiddebugkey \
-            -keypass android \
-            -keystore "$HOME/.android/debug.keystore" \
-            -storepass android \
-            -dname "CN=Android Debug,O=Android,C=US" \
-            -validity 9999 \
-            -deststoretype pkcs12
+          cp android/debug.keystore "$HOME/.android/debug.keystore"
 
           mkdir -p "$HOME/.config/godot"
           cat > "$HOME/.config/godot/editor_settings-4.7.tres" <<EOF
@@ -127,15 +117,15 @@ jobs:
             --headless \
             --path . \
             --export-debug "Android" \
-            "build/buffet-restaurant-v0.13.1-debug.apk"
+            "build/buffet-restaurant-v0.14.0-debug.apk"
 
-          test -s build/buffet-restaurant-v0.13.1-debug.apk
-          ls -lh build/buffet-restaurant-v0.13.1-debug.apk
+          test -s build/buffet-restaurant-v0.14.0-debug.apk
+          ls -lh build/buffet-restaurant-v0.14.0-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: buffet-restaurant-v0.13.1-debug-apk
-          path: build/buffet-restaurant-v0.13.1-debug.apk
+          name: buffet-restaurant-v0.14.0-debug-apk
+          path: build/buffet-restaurant-v0.14.0-debug.apk
           if-no-files-found: error
           retention-days: 14

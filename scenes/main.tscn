@@ -243,10 +243,10 @@ texture = ExtResource("10_cashier")
 scale = Vector2(0.9, 0.9)
 
 [node name="CounterPoint" type="Marker2D" parent="FunctionalFurniture/CashierStation"]
-position = Vector2(112, 2)
+position = Vector2(160, 35)
 
 [node name="QueueStart" type="Marker2D" parent="FunctionalFurniture/CashierStation"]
-position = Vector2(160, 4)
+position = Vector2(210, 35)
 
 [node name="StaticBody2D" type="StaticBody2D" parent="FunctionalFurniture/CashierStation"]
 collision_layer = 1
@@ -487,9 +487,9 @@ texture = ExtResource("14_table")
 scale = Vector2(0.82, 0.82)
 [node name="SeatPoints" type="Node2D" parent="Tables/TableA"]
 [node name="Seat1" type="Marker2D" parent="Tables/TableA/SeatPoints"]
-position = Vector2(0, -92)
+position = Vector2(108, 0)
 [node name="Seat2" type="Marker2D" parent="Tables/TableA/SeatPoints"]
-position = Vector2(0, 92)
+position = Vector2(16, 72)
 [node name="CleanPoint" type="Marker2D" parent="Tables/TableA"]
 position = Vector2(-100, 0)
 [node name="StaticBody2D" type="StaticBody2D" parent="Tables/TableA"]
@@ -498,7 +498,7 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Tables/TableA/StaticBody2D"]
 shape = SubResource("ShapeTable")
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Tables/TableA"]
-radius = 78.0
+radius = 55.0
 avoidance_enabled = true
 avoidance_layers = 1
 
@@ -517,9 +517,9 @@ texture = ExtResource("14_table")
 scale = Vector2(0.82, 0.82)
 [node name="SeatPoints" type="Node2D" parent="Tables/TableB"]
 [node name="Seat1" type="Marker2D" parent="Tables/TableB/SeatPoints"]
-position = Vector2(0, -92)
+position = Vector2(-108, 0)
 [node name="Seat2" type="Marker2D" parent="Tables/TableB/SeatPoints"]
-position = Vector2(0, 92)
+position = Vector2(108, 0)
 [node name="CleanPoint" type="Marker2D" parent="Tables/TableB"]
 position = Vector2(-100, 0)
 [node name="StaticBody2D" type="StaticBody2D" parent="Tables/TableB"]
@@ -528,7 +528,7 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Tables/TableB/StaticBody2D"]
 shape = SubResource("ShapeTable")
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Tables/TableB"]
-radius = 78.0
+radius = 55.0
 avoidance_enabled = true
 avoidance_layers = 1
 
@@ -547,9 +547,9 @@ texture = ExtResource("14_table")
 scale = Vector2(0.82, 0.82)
 [node name="SeatPoints" type="Node2D" parent="Tables/TableC"]
 [node name="Seat1" type="Marker2D" parent="Tables/TableC/SeatPoints"]
-position = Vector2(0, -92)
+position = Vector2(108, -48)
 [node name="Seat2" type="Marker2D" parent="Tables/TableC/SeatPoints"]
-position = Vector2(0, 92)
+position = Vector2(108, 48)
 [node name="CleanPoint" type="Marker2D" parent="Tables/TableC"]
 position = Vector2(-100, 0)
 [node name="StaticBody2D" type="StaticBody2D" parent="Tables/TableC"]
@@ -558,7 +558,7 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Tables/TableC/StaticBody2D"]
 shape = SubResource("ShapeTable")
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Tables/TableC"]
-radius = 78.0
+radius = 55.0
 avoidance_enabled = true
 avoidance_layers = 1
 
