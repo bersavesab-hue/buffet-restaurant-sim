@@ -8,6 +8,11 @@ extends Camera2D
 @export var max_zoom := 1.35
 @export var zoom_step := 0.10
 @export var bounds_margin := 96.0
+@export var business_focus := Vector2(360.0, 720.0)
+@export var business_zoom_default := 1.18
+@export var business_zoom_long := 1.26
+@export var business_zoom_tall := 1.32
+@export var build_zoom := 0.78
 
 @onready var grid: RestaurantGrid = get_node(grid_path) as RestaurantGrid
 @onready var expansion: RestaurantExpansion = get_node(expansion_path) as RestaurantExpansion
@@ -15,10 +20,42 @@ extends Camera2D
 var touches: Dictionary = {}
 var mouse_dragging := false
 var last_pinch_distance := 0.0
+var build_view_active := false
 
 func _ready() -> void:
 	if expansion != null:
 		expansion.expansion_changed.connect(_on_expansion_changed)
+	call_deferred("show_business_view")
+
+func show_business_view(viewport_size: Vector2 = Vector2.ZERO) -> void:
+	build_view_active = false
+	set_navigation_enabled(false)
+	var size := viewport_size
+	if size.x <= 1.0 or size.y <= 1.0:
+		size = get_viewport_rect().size
+	var level := calculate_business_zoom(size)
+	zoom = Vector2(level, level)
+	position = business_focus
+
+func show_build_view() -> void:
+	build_view_active = true
+	zoom = Vector2(build_zoom, build_zoom)
+	focus_unlocked_region()
+	set_navigation_enabled(true)
+
+func refresh_for_viewport(viewport_size: Vector2) -> void:
+	if build_view_active:
+		_clamp_position()
+	else:
+		show_business_view(viewport_size)
+
+static func calculate_business_zoom(viewport_size: Vector2) -> float:
+	var ratio := viewport_size.y / maxf(1.0, viewport_size.x)
+	if ratio >= 2.12:
+		return 1.32
+	if ratio >= 1.92:
+		return 1.26
+	return 1.18
 
 func set_navigation_enabled(value: bool) -> void:
 	navigation_enabled = value
@@ -120,5 +157,5 @@ func _clamp_position() -> void:
 		position.y = clampf(position.y, bounds.position.y + half.y, bounds.end.y - half.y)
 
 func _on_expansion_changed(_stage: int, _name: String, _rect: Rect2i) -> void:
-	if navigation_enabled:
+	if build_view_active:
 		_clamp_position()
