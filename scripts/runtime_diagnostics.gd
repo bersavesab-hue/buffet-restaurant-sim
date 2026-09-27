@@ -5,7 +5,7 @@ extends Node
 @export var queue_warning_seconds: float = 14.0
 
 @onready var main := get_parent()
-@onready var diagnostics_label: Label = main.get_node_or_null("CanvasLayer/UI/VBox/DiagnosticsLabel") as Label
+@onready var diagnostics_label: Label = main.get_node_or_null("CanvasLayer/GameHUD/Drawer/VBox/SettingsRow/DiagnosticsStatus") as Label
 
 var customer_watch: Dictionary = {}
 var queue_watch := {
@@ -41,7 +41,7 @@ func _run_startup_self_check() -> void:
 		"BuildModeController",
 		"BuildPreview",
 		"CanvasLayer/BuildPanel",
-		"CanvasLayer/Controls/HBox/BuildMode",
+		"CanvasLayer/GameHUD/Drawer/VBox/BusinessBox/Build",
 		"FoodStations",
 		"Tables",
 		"Kitchen",

@@ -22,34 +22,6 @@ const SAVE_PATH := "user://buffet_progress_v1.json"
 @onready var entrance: Marker2D = $Points/Entrance
 @onready var exit_point: Marker2D = $Points/Exit
 
-@onready var stats_label: Label = $CanvasLayer/UI/VBox/StatsLabel
-@onready var economy_label: Label = $CanvasLayer/UI/VBox/EconomyLabel
-@onready var stock_label: Label = $CanvasLayer/UI/VBox/StockLabel
-@onready var pantry_label: Label = $CanvasLayer/UI/VBox/PantryLabel
-@onready var environment_label: Label = $CanvasLayer/UI/VBox/EnvironmentLabel
-@onready var kitchen_label: Label = $CanvasLayer/UI/VBox/KitchenLabel
-@onready var chef_label: Label = $CanvasLayer/UI/VBox/ChefLabel
-@onready var staff_label: Label = $CanvasLayer/UI/VBox/StaffLabel
-@onready var review_label: Label = $CanvasLayer/UI/VBox/ReviewLabel
-@onready var status_label: Label = $CanvasLayer/UI/VBox/StatusLabel
-@onready var debug_toggle_button: Button = $CanvasLayer/UI/VBox/DebugToggle
-
-@onready var ac_switch_button: Button = $CanvasLayer/Controls/HBox/ACSwitch
-@onready var temp_down_button: Button = $CanvasLayer/Controls/HBox/TempDown
-@onready var temp_up_button: Button = $CanvasLayer/Controls/HBox/TempUp
-@onready var speed_1_button: Button = $CanvasLayer/Controls/HBox/Speed1
-@onready var speed_2_button: Button = $CanvasLayer/Controls/HBox/Speed2
-@onready var speed_3_button: Button = $CanvasLayer/Controls/HBox/Speed3
-
-@onready var priority_auto_button: Button = $CanvasLayer/PriorityControls/HBox/Auto
-@onready var priority_staple_button: Button = $CanvasLayer/PriorityControls/HBox/Staple
-@onready var priority_meat_button: Button = $CanvasLayer/PriorityControls/HBox/Meat
-@onready var priority_seafood_button: Button = $CanvasLayer/PriorityControls/HBox/Seafood
-
-@onready var supply_staple_button: Button = $CanvasLayer/SupplyControls/HBox/Staple
-@onready var supply_meat_button: Button = $CanvasLayer/SupplyControls/HBox/Meat
-@onready var supply_seafood_button: Button = $CanvasLayer/SupplyControls/HBox/Seafood
-
 var stations: Array[FoodStation] = []
 var tables: Array[BuffetTable] = []
 var active_customers: Array[BuffetCustomer] = []
@@ -67,11 +39,9 @@ var finished_today := 0
 
 var ticket_revenue := 0.0
 var food_cost := 0.0
-var consumed_food_cost := 0.0
 var opening_prepared_food_cost := 0.0
 var utility_cost := 0.0
 
-var total_payback_ratio := 0.0
 var total_rating := 0.0
 var last_review := "暂无评价"
 
@@ -80,7 +50,6 @@ var heat_load := 0.0
 var ac_enabled := true
 var ac_setpoint := 24.0
 var selected_speed := 1.0
-var debug_details_visible := false
 
 var day_settled := false
 var day_index := 1
@@ -136,12 +105,8 @@ func _ready() -> void:
 	kitchen.batch_prepared.connect(_on_kitchen_batch_prepared)
 	kitchen.ingredient_shortage.connect(_on_kitchen_ingredient_shortage)
 	chef_worker.setup(kitchen, kitchen_facility.get_prep_position())
-	_connect_controls()
-	_apply_hud_mode()
 	day_remaining = day_duration_seconds
 	spawn_timer = 0.4
-	status_label.text = "营业中：69元大众自助"
-	_update_control_labels()
 	call_deferred("_restore_furniture")
 
 func _load_progress() -> void:
@@ -211,7 +176,6 @@ func _restore_furniture() -> void:
 			manager.place(entity, entity.grid_position, entity.rotation_index)
 	kitchen.setup(stations, pantry)
 	restoring_progress = false
-	_update_control_labels()
 
 func start_next_day() -> void:
 	if not day_settled:
@@ -234,7 +198,6 @@ func _process(delta: float) -> void:
 		_update_table_queue()
 		_update_restroom_queue()
 
-	_update_debug_ui()
 
 func _collect_world_objects() -> void:
 	for node in $FoodStations.get_children():
@@ -252,24 +215,6 @@ func _register_initial_inventory_cost() -> void:
 	for station in stations:
 		opening_prepared_food_cost += station.stock * station.cost_per_unit
 	food_cost += opening_prepared_food_cost
-
-func _connect_controls() -> void:
-	ac_switch_button.pressed.connect(_on_ac_switch_pressed)
-	temp_down_button.pressed.connect(_on_temp_down_pressed)
-	temp_up_button.pressed.connect(_on_temp_up_pressed)
-	speed_1_button.pressed.connect(func(): _set_speed(1.0))
-	speed_2_button.pressed.connect(func(): _set_speed(2.0))
-	speed_3_button.pressed.connect(func(): _set_speed(3.0))
-
-	priority_auto_button.pressed.connect(func(): _set_kitchen_priority("auto"))
-	priority_staple_button.pressed.connect(func(): _set_kitchen_priority("staple"))
-	priority_meat_button.pressed.connect(func(): _set_kitchen_priority("meat"))
-	priority_seafood_button.pressed.connect(func(): _set_kitchen_priority("seafood"))
-
-	supply_staple_button.pressed.connect(func(): _toggle_station_refill("staple"))
-	supply_meat_button.pressed.connect(func(): _toggle_station_refill("meat"))
-	supply_seafood_button.pressed.connect(func(): _toggle_station_refill("seafood"))
-	debug_toggle_button.pressed.connect(_toggle_debug_details)
 
 func _update_day(delta: float) -> void:
 	if day_remaining > 0.0:
@@ -290,15 +235,12 @@ func _spawn_customer() -> void:
 	)
 
 	var profile: Dictionary = customer_profiles[rng.randi_range(0, customer_profiles.size() - 1)]
-	customer.state_changed.connect(_on_customer_state_changed)
-	customer.metrics_changed.connect(_on_customer_metrics_changed)
 	customer.cashier_requested.connect(_on_cashier_requested)
 	customer.food_station_requested.connect(_on_food_station_requested)
 	customer.table_requested.connect(_on_table_requested)
 	customer.restroom_requested.connect(_on_restroom_requested)
 	customer.restroom_released.connect(_on_restroom_released)
 	customer.ticket_paid.connect(_on_ticket_paid)
-	customer.portion_taken.connect(_on_portion_taken)
 	customer.finished.connect(_on_customer_finished)
 	active_customers.append(customer)
 	spawned_today += 1
@@ -445,9 +387,6 @@ func _on_ticket_paid(customer: BuffetCustomer, amount: float) -> void:
 	if cashier_service_customer == customer:
 		cashier_service_customer = null
 
-func _on_portion_taken(_customer: BuffetCustomer, cost: float) -> void:
-	consumed_food_cost += cost
-
 func _on_kitchen_batch_prepared(_station_name: String, _food_units: float, _raw_units: float) -> void:
 	pass
 
@@ -459,7 +398,6 @@ func _on_table_became_dirty(table: BuffetTable) -> void:
 
 func _on_customer_finished(customer: BuffetCustomer, result: Dictionary) -> void:
 	finished_today += 1
-	total_payback_ratio += float(result.get("payback_ratio", 0.0))
 	total_rating += float(result.get("rating", 0.0))
 	last_review = str(result.get("review", "整体还可以"))
 
@@ -480,12 +418,6 @@ func _on_customer_finished(customer: BuffetCustomer, result: Dictionary) -> void
 	_refresh_table_wait_targets()
 	_refresh_restroom_queue_targets()
 
-func _on_customer_state_changed(_customer: BuffetCustomer, _label: String) -> void:
-	pass
-
-func _on_customer_metrics_changed(_customer: BuffetCustomer, _fullness_ratio: float, _payback_ratio: float) -> void:
-	pass
-
 func _settle_day() -> void:
 	if day_settled:
 		return
@@ -493,53 +425,35 @@ func _settle_day() -> void:
 	kitchen.set_active(false)
 	Engine.time_scale = 1.0
 	selected_speed = 1.0
-	_update_control_labels()
 
 	var profit := ticket_revenue - food_cost - utility_cost
 	cash_balance += profit
 	_save_progress(day_index + 1)
-	var average_payback := 0.0
-	var average_rating := 0.0
-	if finished_today > 0:
-		average_payback = total_payback_ratio / float(finished_today)
-		average_rating = total_rating / float(finished_today)
 
-	status_label.text = "营业结束｜顾客 %d｜回本感 %d%%｜评分 %.1f★｜利润 ¥%.1f" % [
-		finished_today,
-		int(round(average_payback * 100.0)),
-		average_rating,
-		profit
-	]
 
 func _on_ac_switch_pressed() -> void:
 	ac_enabled = not ac_enabled
-	_update_control_labels()
 
 func _on_temp_down_pressed() -> void:
 	ac_setpoint = maxf(20.0, ac_setpoint - 1.0)
-	_update_control_labels()
 
 func _on_temp_up_pressed() -> void:
 	ac_setpoint = minf(28.0, ac_setpoint + 1.0)
-	_update_control_labels()
 
 func _set_speed(multiplier: float) -> void:
 	if day_settled:
 		return
 	selected_speed = multiplier
 	Engine.time_scale = multiplier
-	_update_control_labels()
 
 func _set_kitchen_priority(food_tag: String) -> void:
 	kitchen.set_priority(food_tag)
-	_update_control_labels()
 
 func _toggle_station_refill(food_tag: String) -> void:
 	for station in stations:
 		if station.food_tag == food_tag:
 			station.set_refill_enabled(not station.is_refill_enabled())
 			break
-	_update_control_labels()
 
 func _get_station_by_tag(food_tag: String) -> FoodStation:
 	for station in stations:
@@ -547,110 +461,11 @@ func _get_station_by_tag(food_tag: String) -> FoodStation:
 			return station
 	return null
 
-func _update_control_labels() -> void:
-	ac_switch_button.text = "空调：" + ("开" if ac_enabled else "关")
-	temp_down_button.text = "温度-"
-	temp_up_button.text = "温度+"
-	speed_1_button.text = "1×" + ("●" if selected_speed == 1.0 else "")
-	speed_2_button.text = "2×" + ("●" if selected_speed == 2.0 else "")
-	speed_3_button.text = "3×" + ("●" if selected_speed == 3.0 else "")
-
-	priority_auto_button.text = "自动" + ("●" if kitchen.priority_tag == "auto" else "")
-	priority_staple_button.text = "主食" + ("●" if kitchen.priority_tag == "staple" else "")
-	priority_meat_button.text = "肉类" + ("●" if kitchen.priority_tag == "meat" else "")
-	priority_seafood_button.text = "海鲜" + ("●" if kitchen.priority_tag == "seafood" else "")
-
-	var staple := _get_station_by_tag("staple")
-	var meat := _get_station_by_tag("meat")
-	var seafood := _get_station_by_tag("seafood")
-	if staple != null:
-		supply_staple_button.text = "主食补菜：" + ("开" if staple.is_refill_enabled() else "停")
-	if meat != null:
-		supply_meat_button.text = "肉类补菜：" + ("开" if meat.is_refill_enabled() else "停")
-	if seafood != null:
-		supply_seafood_button.text = "海鲜补菜：" + ("开" if seafood.is_refill_enabled() else "停")
-
 func _get_food_queue_total() -> int:
 	var total := 0
 	for station in stations:
 		total += station.get_queue_size()
 	return total
-
-func _get_table_stats() -> String:
-	var occupied := 0
-	var capacity := 0
-	var dirty := 0
-	for table in tables:
-		occupied += table.get_occupied_count()
-		capacity += table.get_capacity()
-		if table.is_dirty():
-			dirty += 1
-	return "%d/%d 脏桌%d" % [occupied, capacity, dirty]
-
-func _update_debug_ui() -> void:
-	stats_label.text = "时间 %02d秒｜店内%d｜收银%d｜取餐%d｜等座%d｜厕所%d｜桌%s" % [
-		int(ceil(day_remaining)),
-		active_customers.size(),
-		cashier_queue.size(),
-		_get_food_queue_total(),
-		table_wait_queue.size(),
-		restroom_queue.size(),
-		_get_table_stats()
-	]
-
-	var profit := ticket_revenue - food_cost - utility_cost
-	economy_label.text = "门票¥%.1f｜采购+开台¥%.1f｜已吃成本¥%.1f｜电费¥%.1f｜利润¥%.1f" % [
-		ticket_revenue,
-		food_cost,
-		consumed_food_cost,
-		utility_cost,
-		profit
-	]
-
-	var parts: Array[String] = []
-	for station in stations:
-		parts.append(station.get_contribution_text())
-	stock_label.text = "餐台：" + " || ".join(parts)
-
-	pantry_label.text = pantry.get_inventory_text()
-	environment_label.text = "室外%.1f℃｜室内%.1f℃｜热负荷+%.1f℃｜空调%s %.0f℃" % [
-		outdoor_temperature,
-		indoor_temperature,
-		heat_load,
-		("开" if ac_enabled else "关"),
-		ac_setpoint
-	]
-	kitchen_label.text = kitchen.get_status()
-	chef_label.text = chef_worker.get_status()
-	staff_label.text = service_worker.get_status()
-	review_label.text = "最新评价：" + last_review
-
-
-func _toggle_debug_details() -> void:
-	debug_details_visible = not debug_details_visible
-	_apply_hud_mode()
-
-func _apply_hud_mode() -> void:
-	var detail_paths := [
-		"CanvasLayer/UI/VBox/StockLabel",
-		"CanvasLayer/UI/VBox/PantryLabel",
-		"CanvasLayer/UI/VBox/EnvironmentLabel",
-		"CanvasLayer/UI/VBox/KitchenLabel",
-		"CanvasLayer/UI/VBox/ChefLabel",
-		"CanvasLayer/UI/VBox/StaffLabel",
-		"CanvasLayer/UI/VBox/DeviceLabel",
-		"CanvasLayer/UI/VBox/DiagnosticsLabel"
-	]
-	for path in detail_paths:
-		var node := get_node_or_null(path) as CanvasItem
-		if node != null:
-			node.visible = debug_details_visible
-	debug_toggle_button.text = "收起详情" if debug_details_visible else "展开详情"
-
-	var mobile_layout := get_node_or_null("CanvasLayer/MobileLayout")
-	if mobile_layout != null and mobile_layout.has_method("refresh_layout"):
-		mobile_layout.call_deferred("refresh_layout")
-
 
 func get_furniture_move_block_reason(entity: PlaceableEntity) -> String:
 	if entity == null or not is_instance_valid(entity):
@@ -739,6 +554,5 @@ func remove_build_furniture(entity: PlaceableEntity) -> bool:
 
 	removed_furniture.append(entity.name)
 	entity.queue_free()
-	_update_control_labels()
 	_save_progress(day_index + (1 if day_settled else 0))
 	return true

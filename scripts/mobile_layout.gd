@@ -5,18 +5,12 @@ const DESIGN_SIZE := Vector2(720.0, 1280.0)
 const SIDE_PADDING := 16.0
 
 @onready var canvas_layer: CanvasLayer = get_parent() as CanvasLayer
-@onready var top_panel: Control = canvas_layer.get_node("UI") as Control
-@onready var supply_panel: Control = canvas_layer.get_node("SupplyControls") as Control
-@onready var priority_panel: Control = canvas_layer.get_node("PriorityControls") as Control
-@onready var controls_panel: Control = canvas_layer.get_node("Controls") as Control
-@onready var device_label: Label = canvas_layer.get_node_or_null("UI/VBox/DeviceLabel") as Label
 @onready var world_camera: Camera2D = canvas_layer.get_parent().get_node_or_null("WorldCamera") as Camera2D
 
 var safe_margins := Vector4.ZERO
 var layout_profile := "16:9"
 
 func _ready() -> void:
-	_configure_touch_targets()
 	get_viewport().size_changed.connect(_apply_layout)
 	call_deferred("_apply_layout")
 
@@ -28,52 +22,11 @@ func _apply_layout() -> void:
 	safe_margins = _get_safe_margins(viewport_size)
 	layout_profile = _profile_for(viewport_size)
 
-	var metrics := calculate_layout_metrics(viewport_size, safe_margins)
-	var left := float(metrics["left"])
-	var right := float(metrics["right"])
-	var top := float(metrics["top"])
-	var bottom := float(metrics["bottom"])
-
 	if world_camera != null:
 		if world_camera.has_method("refresh_for_viewport"):
 			world_camera.call("refresh_for_viewport", viewport_size)
 		else:
 			world_camera.position = calculate_camera_position(viewport_size)
-
-	top_panel.offset_left = left
-	top_panel.offset_right = -right
-	top_panel.offset_top = top
-	var top_height := clampf(top_panel.get_combined_minimum_size().y + 10.0, 118.0, 340.0)
-	top_panel.offset_bottom = top + top_height
-
-	var row_height := 56.0
-	var row_gap := 4.0
-
-	controls_panel.offset_left = left
-	controls_panel.offset_right = -right
-	controls_panel.offset_top = -(row_height + bottom)
-	controls_panel.offset_bottom = -bottom
-
-	priority_panel.offset_left = left
-	priority_panel.offset_right = -right
-	priority_panel.offset_top = -(row_height * 2.0 + row_gap + bottom)
-	priority_panel.offset_bottom = -(row_height + row_gap + bottom)
-
-	supply_panel.offset_left = left
-	supply_panel.offset_right = -right
-	supply_panel.offset_top = -(row_height * 3.0 + row_gap * 2.0 + bottom)
-	supply_panel.offset_bottom = -(row_height * 2.0 + row_gap * 2.0 + bottom)
-
-	if device_label != null:
-		device_label.text = "设备：%dx%d｜%s｜安全区 L%d T%d R%d B%d" % [
-			int(round(viewport_size.x)),
-			int(round(viewport_size.y)),
-			layout_profile,
-			int(round(safe_margins.x)),
-			int(round(safe_margins.y)),
-			int(round(safe_margins.z)),
-			int(round(safe_margins.w))
-		]
 
 	print("[MOBILE_LAYOUT] viewport=%dx%d profile=%s safe=%s" % [
 		int(round(viewport_size.x)),
@@ -146,17 +99,6 @@ static func profile_for_size(viewport_size: Vector2) -> String:
 
 func _profile_for(viewport_size: Vector2) -> String:
 	return profile_for_size(viewport_size)
-
-
-func _configure_touch_targets() -> void:
-	for panel in [supply_panel, priority_panel, controls_panel]:
-		for node in panel.find_children("*", "Button", true, false):
-			var button := node as Button
-			if button == null:
-				continue
-			button.custom_minimum_size.y = 52.0
-			button.add_theme_font_size_override("font_size", 14)
-			button.focus_mode = Control.FOCUS_NONE
 
 
 func refresh_layout() -> void:

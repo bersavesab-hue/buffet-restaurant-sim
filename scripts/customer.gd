@@ -1,15 +1,12 @@
 class_name BuffetCustomer
 extends CharacterBody2D
 
-signal state_changed(customer: BuffetCustomer, label: String)
-signal metrics_changed(customer: BuffetCustomer, fullness_ratio: float, payback_ratio: float)
 signal cashier_requested(customer: BuffetCustomer)
 signal food_station_requested(customer: BuffetCustomer, station: FoodStation)
 signal table_requested(customer: BuffetCustomer)
 signal restroom_requested(customer: BuffetCustomer)
 signal restroom_released(customer: BuffetCustomer)
 signal ticket_paid(customer: BuffetCustomer, amount: float)
-signal portion_taken(customer: BuffetCustomer, cost: float)
 signal finished(customer: BuffetCustomer, result: Dictionary)
 
 enum State {
@@ -262,7 +259,6 @@ func begin_food_service(station: FoodStation) -> void:
 	velocity = Vector2.ZERO
 	visual.set_motion(Vector2.ZERO)
 	visual.set_action("take_food")
-	emit_signal("state_changed", self, "夹菜：" + station.station_name)
 
 func set_table_wait_target(target: Vector2) -> void:
 	table_wait_target = target
@@ -297,14 +293,12 @@ func _arrive() -> void:
 	match state:
 		State.ENTER:
 			state = State.WAIT_CASHIER
-			emit_signal("state_changed", self, "排队结账")
 			emit_signal("cashier_requested", self)
 		State.WAIT_CASHIER:
 			velocity = Vector2.ZERO
 		State.CASHIER:
 			state = State.CASHIER_SERVICE
 			cashier_timer = cashier_service_seconds
-			emit_signal("state_changed", self, "付款取盘")
 		State.WAIT_FOOD:
 			velocity = Vector2.ZERO
 		State.WAIT_TABLE:
@@ -316,7 +310,6 @@ func _arrive() -> void:
 		State.RESTROOM:
 			state = State.RESTROOM_USE
 			restroom_timer = restroom_use_seconds
-			emit_signal("state_changed", self, "使用厕所")
 		State.EXIT:
 			_set_state(State.DONE)
 		_:
@@ -329,45 +322,33 @@ func _set_state(next_state: State) -> void:
 	match state:
 		State.ENTER:
 			_set_target(entrance_position)
-			emit_signal("state_changed", self, "进店")
 		State.WAIT_CASHIER:
 			_set_target(queue_target)
-			emit_signal("state_changed", self, "收银排队")
 		State.CASHIER:
 			_set_target(cashier_counter_position)
-			emit_signal("state_changed", self, "前往收银台")
 		State.WAIT_FOOD:
 			_set_target(food_queue_target)
-			emit_signal("state_changed", self, "等待取餐：" + selected_station.station_name)
 		State.TABLE:
 			if reserved_table != null:
 				_set_target(reserved_table.get_customer_seat_position(self))
-				emit_signal("state_changed", self, "端盘回桌")
 		State.EAT:
 			visual.set_motion(Vector2.ZERO)
 			visual.set_action("eat")
 			eat_timer = eat_seconds
-			emit_signal("state_changed", self, "吃饭")
 		State.WAIT_TABLE:
 			_set_target(table_wait_target)
-			emit_signal("state_changed", self, "等座")
 		State.WAIT_RESTROOM:
 			_set_target(restroom_queue_target)
-			emit_signal("state_changed", self, "厕所排队")
 		State.RESTROOM:
 			_set_target(restroom_position)
-			emit_signal("state_changed", self, "前往厕所")
 		State.RESTROOM_USE:
 			restroom_timer = restroom_use_seconds
-			emit_signal("state_changed", self, "使用厕所")
 		State.EXIT:
 			_release_table()
 			has_plate = false
 			visual.set_carry_visible(false)
 			_set_target(exit_position)
-			emit_signal("state_changed", self, "离店")
 		State.DONE:
-			emit_signal("state_changed", self, "完成")
 			emit_signal("finished", self, _build_result())
 
 func _set_target(position: Vector2) -> void:
@@ -387,7 +368,6 @@ func _choose_next_food_or_leave() -> void:
 
 	state = State.WAIT_FOOD
 	food_queue_target = selected_station.get_service_position()
-	emit_signal("state_changed", self, "前往" + selected_station.station_name)
 	emit_signal("food_station_requested", self, selected_station)
 
 func _select_station() -> FoodStation:
@@ -422,7 +402,6 @@ func _finish_food_service() -> void:
 		reserved_table = _reserve_first_table()
 	if reserved_table == null:
 		state = State.WAIT_TABLE
-		emit_signal("state_changed", self, "等待座位")
 		emit_signal("table_requested", self)
 	else:
 		_set_state(State.TABLE)
@@ -442,8 +421,6 @@ func _take_food() -> void:
 	fullness = minf(stomach_capacity, fullness + float(portion.get("satiation", 0.0)))
 	perceived_value += float(portion.get("perceived_value", 0.0))
 	restroom_need = minf(100.0, restroom_need + actual_units * rng.randf_range(10.0, 15.0))
-	emit_signal("portion_taken", self, float(portion.get("cost", 0.0)))
-	emit_signal("metrics_changed", self, get_fullness_ratio(), get_payback_ratio())
 
 func _after_eating() -> void:
 	visual.set_action("idle")
@@ -461,7 +438,6 @@ func _leave_or_use_restroom() -> void:
 func _request_restroom(leave_after: bool) -> void:
 	leave_after_restroom = leave_after
 	state = State.WAIT_RESTROOM
-	emit_signal("state_changed", self, "寻找厕所")
 	emit_signal("restroom_requested", self)
 
 func _finish_restroom_use() -> void:

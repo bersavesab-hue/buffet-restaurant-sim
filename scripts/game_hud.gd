@@ -51,7 +51,6 @@ extends Control
 @onready var build_button: Button = $Drawer/VBox/BusinessBox/Build
 @onready var next_day_button: Button = $Drawer/VBox/BusinessBox/NextDay
 
-@onready var diagnostics_button: Button = $Drawer/VBox/SettingsRow/Diagnostics
 @onready var close_button: Button = $Drawer/VBox/Close
 
 var active_drawer := ""
@@ -86,7 +85,6 @@ func _ready() -> void:
 
 	build_button.pressed.connect(_enter_build_mode)
 	next_day_button.pressed.connect(func(): main.call("start_next_day"))
-	diagnostics_button.pressed.connect(_toggle_diagnostics)
 
 	get_viewport().size_changed.connect(_apply_layout)
 	call_deferred("_finish_setup")
@@ -138,7 +136,8 @@ func _apply_layout() -> void:
 
 	drawer.offset_left = left
 	drawer.offset_right = -right
-	drawer.offset_top = (-320.0 if active_drawer == "business" else -196.0) - bottom
+	var drawer_height := 320.0 if active_drawer == "business" else (220.0 if active_drawer == "settings" else 196.0)
+	drawer.offset_top = -drawer_height - bottom
 	drawer.offset_bottom = -92.0 - bottom
 
 func _refresh_all() -> void:
@@ -277,14 +276,6 @@ func _enter_build_mode() -> void:
 	var controller := main.get_node_or_null("BuildModeController")
 	if controller != null:
 		controller.call("enter_build_mode")
-
-func _toggle_diagnostics() -> void:
-	var legacy_ui := main.get_node_or_null("CanvasLayer/UI") as Control
-	if legacy_ui == null:
-		return
-	legacy_ui.visible = not legacy_ui.visible
-	diagnostics_button.text = "关闭开发信息" if legacy_ui.visible else "显示开发信息"
-
 
 func _format_signed_money(value: float) -> String:
 	var rounded := int(round(value))

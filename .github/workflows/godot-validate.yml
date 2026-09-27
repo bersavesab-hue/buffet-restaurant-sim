@@ -87,6 +87,13 @@ jobs:
           "$GODOT_BIN" --headless --path . --script res://tests/day_progression_test.gd --log-file day-progression-test.log 2>&1 | tee day-progression-console.log
           grep -q "\[DAY_PROGRESSION_TEST PASS\]" day-progression-test.log day-progression-console.log
 
+      - name: Run player HUD control test
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path . --script res://tests/hud_controls_test.gd --log-file hud-controls-test.log 2>&1 | tee hud-controls-console.log
+          grep -q "\[HUD_CONTROLS_TEST PASS\]" hud-controls-test.log hud-controls-console.log
+
       - name: Run real customer business cycle
         shell: bash
         run: |
@@ -135,6 +142,8 @@ jobs:
             build-mode-console.log
             day-progression-test.log
             day-progression-console.log
+            hud-controls-test.log
+            hud-controls-console.log
             business-cycle-test.log
             business-cycle-console.log
             validation.log

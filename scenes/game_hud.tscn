@@ -347,11 +347,14 @@ theme_override_styles/hover = SubResource("NavAccent")
 visible = false
 layout_mode = 2
 
-[node name="Diagnostics" type="Button" parent="Drawer/VBox/SettingsRow"]
+[node name="DiagnosticsStatus" type="Label" parent="Drawer/VBox/SettingsRow"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "显示开发信息"
+text = "诊断：启动中"
+horizontal_alignment = 1
+vertical_alignment = 1
+label_settings = SubResource("DarkSecondary")
 
 [node name="Close" type="Button" parent="Drawer/VBox"]
 custom_minimum_size = Vector2(0, 36)

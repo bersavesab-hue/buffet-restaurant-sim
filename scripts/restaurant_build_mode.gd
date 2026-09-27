@@ -9,7 +9,6 @@ signal build_mode_changed(active: bool)
 @onready var world_camera: RestaurantCamera = main.get_node("WorldCamera") as RestaurantCamera
 @onready var preview: BuildPlacementPreview = main.get_node("BuildPreview") as BuildPlacementPreview
 
-@onready var enter_button: Button = main.get_node("CanvasLayer/Controls/HBox/BuildMode") as Button
 @onready var build_panel: Control = main.get_node("CanvasLayer/BuildPanel") as Control
 @onready var selected_label: Label = main.get_node("CanvasLayer/BuildPanel/VBox/SelectedLabel") as Label
 @onready var status_label: Label = main.get_node("CanvasLayer/BuildPanel/VBox/StatusLabel") as Label
@@ -19,9 +18,6 @@ signal build_mode_changed(active: bool)
 @onready var remove_button: Button = main.get_node("CanvasLayer/BuildPanel/VBox/Actions/Remove") as Button
 @onready var exit_button: Button = main.get_node("CanvasLayer/BuildPanel/VBox/Actions/Exit") as Button
 
-@onready var supply_controls: CanvasItem = main.get_node("CanvasLayer/SupplyControls") as CanvasItem
-@onready var priority_controls: CanvasItem = main.get_node("CanvasLayer/PriorityControls") as CanvasItem
-@onready var operation_controls: CanvasItem = main.get_node("CanvasLayer/Controls") as CanvasItem
 @onready var game_hud: GameHUD = main.get_node("CanvasLayer/GameHUD") as GameHUD
 
 var build_mode := false
@@ -35,7 +31,6 @@ func _ready() -> void:
 	build_panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	build_panel.visible = false
 
-	enter_button.pressed.connect(enter_build_mode)
 	rotate_button.pressed.connect(_rotate_selected)
 	confirm_button.pressed.connect(_confirm_selected)
 	cancel_button.pressed.connect(_cancel_selected)
@@ -50,9 +45,6 @@ func enter_build_mode() -> void:
 	build_mode = true
 	previous_pause_state = get_tree().paused
 	build_panel.visible = true
-	supply_controls.visible = false
-	priority_controls.visible = false
-	operation_controls.visible = false
 	if game_hud != null:
 		game_hud.set_build_mode_active(true)
 
@@ -78,9 +70,6 @@ func exit_build_mode() -> void:
 	world_camera.process_mode = Node.PROCESS_MODE_INHERIT
 
 	build_panel.visible = false
-	supply_controls.visible = false
-	priority_controls.visible = false
-	operation_controls.visible = false
 	if game_hud != null:
 		game_hud.set_build_mode_active(false)
 	build_mode = false
