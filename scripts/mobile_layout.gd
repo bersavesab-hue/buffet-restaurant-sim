@@ -35,9 +35,10 @@ func _apply_layout() -> void:
 	var bottom := float(metrics["bottom"])
 
 	if world_camera != null:
-		# Keep the authored 720×1280 restaurant aligned to the top on tall phones.
-		# Extra height is revealed below the core scene instead of above it.
-		world_camera.position = calculate_camera_position(viewport_size)
+		if world_camera.has_method("refresh_for_viewport"):
+			world_camera.call("refresh_for_viewport", viewport_size)
+		else:
+			world_camera.position = calculate_camera_position(viewport_size)
 
 	top_panel.offset_left = left
 	top_panel.offset_right = -right
