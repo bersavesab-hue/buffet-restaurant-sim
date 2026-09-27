@@ -1,0 +1,419 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/game_hud.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="TopPanel"]
+bg_color = Color(0.94, 0.90, 0.81, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.28, 0.20, 0.14, 1)
+corner_radius_top_left = 13
+corner_radius_top_right = 13
+corner_radius_bottom_right = 13
+corner_radius_bottom_left = 13
+shadow_color = Color(0.12, 0.08, 0.05, 0.22)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="DarkCard"]
+bg_color = Color(0.25, 0.19, 0.15, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="NavPanel"]
+bg_color = Color(0.20, 0.16, 0.13, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.43, 0.31, 0.22, 1)
+corner_radius_top_left = 13
+corner_radius_top_right = 13
+corner_radius_bottom_right = 13
+corner_radius_bottom_left = 13
+shadow_color = Color(0.10, 0.07, 0.04, 0.28)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="NavButton"]
+bg_color = Color(0.95, 0.89, 0.77, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.49, 0.34, 0.22, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="NavAccent"]
+bg_color = Color(0.84, 0.43, 0.11, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.48, 0.25, 0.08, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="DrawerPanel"]
+bg_color = Color(0.95, 0.91, 0.83, 0.99)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.25, 0.17, 1)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+shadow_color = Color(0.10, 0.07, 0.04, 0.24)
+shadow_size = 4
+
+[sub_resource type="LabelSettings" id="LightPrimary"]
+font_size = 17
+font_color = Color(1, 0.96, 0.87, 1)
+
+[sub_resource type="LabelSettings" id="DarkSecondary"]
+font_size = 15
+font_color = Color(0.20, 0.15, 0.11, 1)
+
+[node name="GameHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="TopHUD" type="PanelContainer" parent="."]
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = 114.0
+theme_override_styles/panel = SubResource("TopPanel")
+
+[node name="VBox" type="VBoxContainer" parent="TopHUD"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Primary" type="HBoxContainer" parent="TopHUD/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="DayCard" type="PanelContainer" parent="TopHUD/VBox/Primary"]
+custom_minimum_size = Vector2(128, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("DarkCard")
+
+[node name="DayTime" type="Label" parent="TopHUD/VBox/Primary/DayCard"]
+layout_mode = 2
+text = "第1天  10:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+label_settings = SubResource("LightPrimary")
+
+[node name="BusinessCard" type="PanelContainer" parent="TopHUD/VBox/Primary"]
+custom_minimum_size = Vector2(98, 42)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_styles/panel = SubResource("DarkCard")
+
+[node name="Business" type="Label" parent="TopHUD/VBox/Primary/BusinessCard"]
+layout_mode = 2
+text = "营业中"
+horizontal_alignment = 1
+vertical_alignment = 1
+label_settings = SubResource("LightPrimary")
+
+[node name="RevenueCard" type="PanelContainer" parent="TopHUD/VBox/Primary"]
+custom_minimum_size = Vector2(156, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("DarkCard")
+
+[node name="Revenue" type="Label" parent="TopHUD/VBox/Primary/RevenueCard"]
+layout_mode = 2
+text = "营业额  ¥0"
+horizontal_alignment = 1
+vertical_alignment = 1
+label_settings = SubResource("LightPrimary")
+
+[node name="RatingCard" type="PanelContainer" parent="TopHUD/VBox/Primary"]
+custom_minimum_size = Vector2(92, 42)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_styles/panel = SubResource("DarkCard")
+
+[node name="Rating" type="Label" parent="TopHUD/VBox/Primary/RatingCard"]
+layout_mode = 2
+text = "★ --"
+horizontal_alignment = 1
+vertical_alignment = 1
+label_settings = SubResource("LightPrimary")
+
+[node name="Settings" type="Button" parent="TopHUD/VBox/Primary"]
+custom_minimum_size = Vector2(62, 42)
+layout_mode = 2
+text = "设置"
+theme_override_colors/font_color = Color(1, 0.95, 0.84, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("DarkCard")
+theme_override_styles/hover = SubResource("DarkCard")
+theme_override_styles/pressed = SubResource("NavAccent")
+
+[node name="Secondary" type="HBoxContainer" parent="TopHUD/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Occupancy" type="Label" parent="TopHUD/VBox/Secondary"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "店内 0/6"
+horizontal_alignment = 1
+label_settings = SubResource("DarkSecondary")
+
+[node name="Queue" type="Label" parent="TopHUD/VBox/Secondary"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "排队 0"
+horizontal_alignment = 1
+label_settings = SubResource("DarkSecondary")
+
+[node name="Temperature" type="Label" parent="TopHUD/VBox/Secondary"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "室温 29°C"
+horizontal_alignment = 1
+label_settings = SubResource("DarkSecondary")
+
+[node name="Profit" type="Label" parent="TopHUD/VBox/Secondary"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "今日利润 +0"
+horizontal_alignment = 1
+label_settings = SubResource("DarkSecondary")
+
+[node name="Drawer" type="PanelContainer" parent="."]
+visible = false
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -196.0
+offset_right = -12.0
+offset_bottom = -92.0
+theme_override_styles/panel = SubResource("DrawerPanel")
+
+[node name="VBox" type="VBoxContainer" parent="Drawer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Title" type="Label" parent="Drawer/VBox"]
+layout_mode = 2
+text = "经营"
+horizontal_alignment = 1
+label_settings = SubResource("DarkSecondary")
+
+[node name="SupplyRow" type="HBoxContainer" parent="Drawer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Staple" type="Button" parent="Drawer/VBox/SupplyRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "主食"
+
+[node name="Meat" type="Button" parent="Drawer/VBox/SupplyRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "肉类"
+
+[node name="Seafood" type="Button" parent="Drawer/VBox/SupplyRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "海鲜"
+
+[node name="KitchenRow" type="HBoxContainer" parent="Drawer/VBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Auto" type="Button" parent="Drawer/VBox/KitchenRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "自动"
+
+[node name="Staple" type="Button" parent="Drawer/VBox/KitchenRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "主食"
+
+[node name="Meat" type="Button" parent="Drawer/VBox/KitchenRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "肉类"
+
+[node name="Seafood" type="Button" parent="Drawer/VBox/KitchenRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "海鲜"
+
+[node name="ACRow" type="HBoxContainer" parent="Drawer/VBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Toggle" type="Button" parent="Drawer/VBox/ACRow"]
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "空调 开启"
+
+[node name="Down" type="Button" parent="Drawer/VBox/ACRow"]
+custom_minimum_size = Vector2(70, 48)
+layout_mode = 2
+text = "－"
+
+[node name="Value" type="Label" parent="Drawer/VBox/ACRow"]
+custom_minimum_size = Vector2(92, 48)
+layout_mode = 2
+text = "24°C"
+horizontal_alignment = 1
+vertical_alignment = 1
+label_settings = SubResource("DarkSecondary")
+
+[node name="Up" type="Button" parent="Drawer/VBox/ACRow"]
+custom_minimum_size = Vector2(70, 48)
+layout_mode = 2
+text = "＋"
+
+[node name="BusinessBox" type="VBoxContainer" parent="Drawer/VBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Summary" type="Label" parent="Drawer/VBox/BusinessBox"]
+layout_mode = 2
+text = "营业额 ¥0  利润 ¥0"
+horizontal_alignment = 1
+label_settings = SubResource("DarkSecondary")
+
+[node name="Review" type="Label" parent="Drawer/VBox/BusinessBox"]
+layout_mode = 2
+text = "顾客反馈：暂无评价"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+label_settings = SubResource("DarkSecondary")
+
+[node name="Build" type="Button" parent="Drawer/VBox/BusinessBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "进入装修模式"
+theme_override_colors/font_color = Color(1, 0.96, 0.88, 1)
+theme_override_styles/normal = SubResource("NavAccent")
+theme_override_styles/hover = SubResource("NavAccent")
+
+[node name="SettingsRow" type="HBoxContainer" parent="Drawer/VBox"]
+visible = false
+layout_mode = 2
+
+[node name="Diagnostics" type="Button" parent="Drawer/VBox/SettingsRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "显示开发信息"
+
+[node name="Close" type="Button" parent="Drawer/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "收起"
+
+[node name="BottomNav" type="PanelContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -86.0
+offset_right = -12.0
+offset_bottom = -10.0
+theme_override_styles/panel = SubResource("NavPanel")
+
+[node name="Bar" type="HBoxContainer" parent="BottomNav"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Supply" type="Button" parent="BottomNav/Bar"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "补菜"
+theme_override_colors/font_color = Color(0.27, 0.18, 0.12, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("NavButton")
+theme_override_styles/hover = SubResource("NavButton")
+theme_override_styles/pressed = SubResource("NavAccent")
+
+[node name="Kitchen" type="Button" parent="BottomNav/Bar"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "厨房"
+theme_override_colors/font_color = Color(0.27, 0.18, 0.12, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("NavButton")
+theme_override_styles/hover = SubResource("NavButton")
+theme_override_styles/pressed = SubResource("NavAccent")
+
+[node name="AC" type="Button" parent="BottomNav/Bar"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "空调"
+theme_override_colors/font_color = Color(0.27, 0.18, 0.12, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("NavButton")
+theme_override_styles/hover = SubResource("NavButton")
+theme_override_styles/pressed = SubResource("NavAccent")
+
+[node name="Business" type="Button" parent="BottomNav/Bar"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "经营"
+theme_override_colors/font_color = Color(0.27, 0.18, 0.12, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("NavButton")
+theme_override_styles/hover = SubResource("NavButton")
+theme_override_styles/pressed = SubResource("NavAccent")
+
+[node name="Speed" type="Button" parent="BottomNav/Bar"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "1×"
+theme_override_colors/font_color = Color(1, 0.96, 0.88, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("NavAccent")
+theme_override_styles/hover = SubResource("NavAccent")
+theme_override_styles/pressed = SubResource("DarkCard")
