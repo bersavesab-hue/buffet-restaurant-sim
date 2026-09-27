@@ -186,7 +186,7 @@ func _refresh_primary_stats() -> void:
 	var profit := revenue - food_cost - utility_cost
 	profit_label.text = "今日利润 " + _format_signed_money(profit)
 
-	speed_nav.text = "%g×" % float(main.get("selected_speed"))
+	speed_nav.text = "%d×" % int(round(float(main.get("selected_speed"))))
 
 func _refresh_drawer_controls() -> void:
 	var staple := main.call("_get_station_by_tag", "staple") as FoodStation
