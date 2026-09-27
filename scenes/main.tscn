@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3]
+[gd_scene load_steps=57 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/food_station.gd" id="2_food"]
@@ -28,9 +28,6 @@
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/trash_bin.svg" id="26_bin"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/entrance_mat.svg" id="28_mat"]
 [ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/wall_board.svg" id="29_board"]
-[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/dining_floor.svg" id="30_dining_floor"]
-[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/buffet_floor.svg" id="31_buffet_floor"]
-[ext_resource type="Texture2D" path="res://assets/vertical_slice/environment/restroom_floor.svg" id="32_restroom_floor"]
 [ext_resource type="Script" path="res://scripts/restaurant_grid.gd" id="33_grid"]
 [ext_resource type="Script" path="res://scripts/restaurant_expansion.gd" id="34_expansion"]
 [ext_resource type="Script" path="res://scripts/restaurant_camera.gd" id="35_camera"]
@@ -199,26 +196,8 @@ scale = Vector2(0.72, 0.72)
 z_as_relative = false
 z_index = 650
 
-[node name="DiningFloor" type="Sprite2D" parent="."]
-position = Vector2(250, 770)
-texture = ExtResource("30_dining_floor")
-scale = Vector2(0.95, 0.95)
-z_as_relative = false
-z_index = -948
 
-[node name="BuffetFloor" type="Sprite2D" parent="."]
-position = Vector2(585, 690)
-texture = ExtResource("31_buffet_floor")
-scale = Vector2(0.95, 0.95)
-z_as_relative = false
-z_index = -948
 
-[node name="RestroomFloor" type="Sprite2D" parent="."]
-position = Vector2(485, 930)
-texture = ExtResource("32_restroom_floor")
-scale = Vector2(0.94, 0.94)
-z_as_relative = false
-z_index = -948
 
 [node name="PlantRestroom" type="Sprite2D" parent="."]
 position = Vector2(548, 840)
@@ -630,7 +609,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="CanvasLayer/UI/VBox"]
 layout_mode = 2
-text = "自助餐 v0.13｜正式UI重构"
+text = "自助餐 v0.13.1｜真机视觉校正"
 horizontal_alignment = 1
 label_settings = SubResource("LabelSettings_main")
 
